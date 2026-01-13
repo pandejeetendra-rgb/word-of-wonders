@@ -15,7 +15,7 @@
       --shadow2: 0 6px 16px rgba(0,0,0,.12);
       --radius: 18px;
 
-      /* ✅ Slightly bigger wheel than before, still mobile-safe */
+      /* Slightly bigger wheel, still mobile-safe */
       --wheelSize: clamp(300px, 78vw, 380px);
       --letterSize: clamp(54px, 13vw, 68px);
     }
@@ -91,7 +91,6 @@
     .sectionTitle .left span{ font-size:12px; color:var(--muted); }
     .progress{ font-size:12px; color:var(--muted); white-space:nowrap; }
 
-    /* ✅ only one clue, no extra blocks below */
     .clueBoard{
       display:flex;
       flex-direction:column;
@@ -192,7 +191,6 @@
       gap:10px;
     }
 
-    /* ✅ wheel like original (ring) */
     .wheel{
       width: var(--wheelSize);
       height: var(--wheelSize);
@@ -275,6 +273,34 @@
       border:1px solid rgba(255,255,255,.55);
     }
     .msg{ margin-top:8px; font-size:12px; color:var(--muted); }
+
+    /* ✅ Toast (word validated) */
+    .toast{
+      position:fixed;
+      left:50%;
+      bottom:22px;
+      transform:translateX(-50%);
+      background: rgba(17,24,39,.92);
+      color:#fff;
+      padding:10px 14px;
+      border-radius: 999px;
+      font-weight:800;
+      font-size:13px;
+      box-shadow: var(--shadow);
+      border:1px solid rgba(255,255,255,.15);
+      opacity:0;
+      pointer-events:none;
+      z-index:60;
+    }
+    .toast.show{
+      animation: toastInOut 900ms ease-in-out forwards;
+    }
+    @keyframes toastInOut{
+      0%{opacity:0; transform:translateX(-50%) translateY(10px)}
+      18%{opacity:1; transform:translateX(-50%) translateY(0)}
+      82%{opacity:1; transform:translateX(-50%) translateY(0)}
+      100%{opacity:0; transform:translateX(-50%) translateY(10px)}
+    }
 
     /* MCQ modal */
     .modal{
@@ -365,7 +391,7 @@
         </div>
       </div>
 
-      <!-- ✅ NO BOXES under clue anymore -->
+      <!-- ✅ No boxes under clue -->
 
       <div class="currentWord">
         <div class="wordBox" id="currentWord"> </div>
@@ -419,6 +445,9 @@
     </div>
 
   </div>
+
+  <!-- ✅ Toast -->
+  <div class="toast" id="toast">Word validated ✅</div>
 
 <script>
   const EXTRA_LETTERS = 2;
@@ -509,6 +538,14 @@
     }
   }
 
+  function showToast(text){
+    const t = $("toast");
+    t.textContent = text;
+    t.classList.remove("show");
+    void t.offsetWidth; // restart animation
+    t.classList.add("show");
+  }
+
   /* no consecutive letters adjacent on wheel (circular) */
   function buildWheelLetters(word){
     const base = word.split("");
@@ -539,7 +576,6 @@
     return shuffle(letters);
   }
 
-  /* wheel drawing uses a fixed viewbox, scaled by CSS */
   const VIEW = 280;
 
   function renderWheel(){
@@ -568,7 +604,6 @@
       div.dataset.index = String(i);
       div.textContent = ch;
 
-      // place using percentage to avoid pixel mismatch on resize
       const {x,y} = positions[i];
       div.style.left = `calc(${(x/VIEW)*100}% - (var(--letterSize) / 2))`;
       div.style.top  = `calc(${(y/VIEW)*100}% - (var(--letterSize) / 2))`;
@@ -742,7 +777,8 @@
   function checkCompletion(){
     $("progressText").textContent = `${validated.size} / ${rounds.length}`;
     if(validated.size === rounds.length){
-      setTimeout(()=> alert("Level Complete! All clues validated."), 80);
+      showToast("Level complete ✅");
+      setTimeout(()=> alert("Level Complete! All clues validated."), 120);
     }
   }
 
@@ -769,11 +805,11 @@
   $("submitBtn").addEventListener("click", ()=>{
     const round = rounds[currentRoundIndex];
     if(currentWord !== round.word){
-      alert("Not matched. Use the clue and try again.");
+      showToast("Not matched. Try again.");
       return;
     }
     if(validated.has(round.word)){
-      alert("Already validated.");
+      showToast("Already validated.");
       return;
     }
     openMCQ(round);
@@ -786,6 +822,7 @@
     wheelLetters = buildWheelLetters(round.word);
     renderWheel();
     resetSelection();
+    showToast("Wheel shuffled");
   });
 
   $("mcqReset").addEventListener("click", ()=>{
@@ -814,6 +851,8 @@
     burst();
     closeMCQ();
     resetSelection();
+
+    showToast("Word validated ✅");
 
     const next = currentRoundIndex + 1;
     if(next < rounds.length){
