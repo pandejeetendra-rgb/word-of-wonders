@@ -87,7 +87,7 @@
     .sectionTitle .left span{ font-size:12px; color:var(--muted); }
     .progress{ font-size:12px; color:var(--muted); white-space:nowrap; }
 
-    /* ✅ Current clue (only one at a time) */
+    /* ✅ Only current clue shown */
     .clueBoard{
       display:flex;
       flex-direction:column;
@@ -128,7 +128,7 @@
       color:#334155;
     }
 
-    /* ✅ Crossword grid 10×10 */
+    /* ✅ Grid auto-crops to active band (removes empty space) */
     .grid{
       display:grid;
       grid-template-columns: repeat(10, 1fr);
@@ -138,6 +138,7 @@
       border-radius: 16px;
       box-shadow: var(--shadow2);
       border:1px solid rgba(255,255,255,.65);
+      align-content: start; /* important */
     }
     .cell{
       aspect-ratio: 1 / 1;
@@ -403,9 +404,8 @@
         <div class="progress" id="progressText">0 / 0</div>
       </div>
 
-      <!-- ✅ only current clue shown -->
       <div class="clueBoard">
-        <div class="clueItem" id="currentClueItem">
+        <div class="clueItem">
           <div class="clueNo" id="clueNo">1</div>
           <div class="clueText" id="currentClueText"><b>Clue:</b> —</div>
         </div>
@@ -448,7 +448,6 @@
       </div>
     </div>
 
-    <!-- MCQ modal -->
     <div class="modal" id="mcqModal">
       <div class="modalBox">
         <div class="modalTop">
@@ -468,13 +467,11 @@
   </div>
 
 <script>
-  /* SETTINGS */
   const ROWS = 10;
   const COLS = 10;
   const EXTRA_LETTERS = 2;
   const SHUFFLE_MCQ_OPTIONS = true;
 
-  /* ROUNDS */
   const rounds = [
     { word:"SECURITY", theme:"Browser Protection", clue:"A browser must protect users from online threats.",
       mcq:{ q:"Which is the best meaning of browser security?",
@@ -526,14 +523,11 @@
         answerIndex:1 } },
   ];
 
-  /* STATE */
   let currentRoundIndex = 0;
   let validated = new Set();
-
   let wheelLetters = [];
   let selectedIndices = [];
   let currentWord = "";
-
   let placement = null;
   let gridState = makeEmptyGrid();
 
@@ -549,7 +543,6 @@
   }
   function randInt(min,max){ return Math.floor(Math.random()*(max-min+1))+min; }
 
-  /* GRID */
   function makeEmptyGrid(){
     const grid = [];
     for(let r=0;r<ROWS;r++){
@@ -589,10 +582,29 @@
     renderGrid();
   }
 
+  /* ✅ CROPPED GRID RENDER */
   function renderGrid(){
     const gridEl = $("grid");
     gridEl.innerHTML = "";
+
+    let minRow = ROWS, maxRow = -1;
     for(let r=0;r<ROWS;r++){
+      for(let c=0;c<COLS;c++){
+        if(gridState[r][c].active){
+          minRow = Math.min(minRow, r);
+          maxRow = Math.max(maxRow, r);
+        }
+      }
+    }
+    if(minRow > maxRow){
+      minRow = 0; maxRow = ROWS-1;
+    }
+
+    const pad = 1;
+    const start = Math.max(0, minRow - pad);
+    const end   = Math.min(ROWS - 1, maxRow + pad);
+
+    for(let r=start; r<=end; r++){
       for(let c=0;c<COLS;c++){
         const cell = gridState[r][c];
         const d = document.createElement("div");
@@ -600,7 +612,7 @@
         if(!cell.active) d.classList.add("blank");
         if(cell.active) d.classList.add("locked");
         if(cell.revealed) d.classList.add("reveal");
-        d.textContent = cell.revealed ? cell.letter : (cell.active ? "" : "");
+        d.textContent = cell.revealed ? cell.letter : "";
         gridEl.appendChild(d);
       }
     }
@@ -611,16 +623,13 @@
     renderGrid();
   }
 
-  /* ✅ SAFE WHEEL: no consecutive letters adjacent (circular) */
   function buildWheelLetters(word){
     const base = word.split("");
     const alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("");
-
     const extras = [];
     for(let i=0;i<EXTRA_LETTERS;i++){
       extras.push(alphabet[randInt(0, alphabet.length-1)]);
     }
-
     const letters = base.concat(extras);
 
     const forbidden = new Set();
@@ -782,7 +791,6 @@
     $("currentWord").textContent = currentWord || " ";
   }
 
-  /* MCQ */
   function openMCQ(round){
     $("mcqModal").style.display = "block";
     $("mcqBadge").textContent = `MCQ check`;
@@ -794,7 +802,6 @@
 
     const optionItems = round.mcq.options.map((t,i)=>({t,i}));
     const rendered = SHUFFLE_MCQ_OPTIONS ? shuffle(optionItems) : optionItems;
-
     opts.dataset.correct = String(rendered.findIndex(x => x.i === round.mcq.answerIndex));
 
     rendered.forEach((o, idx)=>{
@@ -838,7 +845,6 @@
     setTimeout(()=>b.remove(), 600);
   }
 
-  /* ROUND */
   function setRound(i){
     currentRoundIndex = i;
     const round = rounds[currentRoundIndex];
@@ -848,8 +854,6 @@
 
     $("clueNo").textContent = String(i + 1);
     $("currentClueText").innerHTML = `<b>Clue:</b> ${round.clue}`;
-
-    $("hintText").innerHTML = `<b>Status:</b> Use the clue, build the word, then answer the MCQ.`;
 
     placement = choosePlacement(round.word);
     applyPlacement(round.word, placement);
@@ -877,12 +881,10 @@
     }
   }
 
-  /* ACTIONS */
   $("submitBtn").addEventListener("click", ()=>{
     const round = rounds[currentRoundIndex];
-
     if(currentWord !== round.word){
-      alert("Not matched. Use the sentence clue and try again.");
+      alert("Not matched. Use the clue and try again.");
       return;
     }
     if(validated.has(round.word)){
@@ -936,7 +938,6 @@
     checkCompletion();
   });
 
-  /* INIT */
   (function init(){
     $("progressText").textContent = `0 / ${rounds.length}`;
     setRound(0);
