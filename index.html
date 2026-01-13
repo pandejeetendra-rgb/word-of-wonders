@@ -33,7 +33,7 @@
       padding:18px 12px 28px;
     }
 
-    .wrap{ width:min(480px, 96vw); }
+    .wrap{ width:min(500px, 96vw); }
 
     header{
       display:flex;
@@ -102,6 +102,38 @@
       color:var(--muted);
     }
     .progress{ font-size:12px; color:var(--muted); white-space:nowrap; }
+
+    /* Word list panel (WoW feel) */
+    .wordList{
+      display:flex;
+      flex-wrap:wrap;
+      gap:8px;
+      margin: 8px 0 12px;
+      padding:10px;
+      background: rgba(255,255,255,.55);
+      border:1px solid rgba(255,255,255,.65);
+      border-radius: 16px;
+      box-shadow: var(--shadow2);
+      justify-content:center;
+    }
+    .chip{
+      padding:6px 10px;
+      border-radius: 999px;
+      font-size:12px;
+      font-weight:800;
+      border:1px solid rgba(0,0,0,.08);
+      background: rgba(255,255,255,.85);
+      color:#334155;
+      user-select:none;
+    }
+    .chip.done{
+      background: rgba(34,197,94,.15);
+      border-color: rgba(34,197,94,.35);
+      color:#166534;
+    }
+    .chip.current{
+      outline: 2px solid rgba(59,130,246,.55);
+    }
 
     /* Crossword grid */
     .grid{
@@ -172,7 +204,7 @@
       font-size:12px;
       color:var(--muted);
       text-align:right;
-      min-width:140px;
+      min-width:150px;
     }
     .hintLine{
       margin:0 2px 10px;
@@ -395,6 +427,9 @@
         <div class="progress" id="progressText">0 / 0</div>
       </div>
 
+      <!-- NEW: word list -->
+      <div class="wordList" id="wordList"></div>
+
       <div class="grid" id="grid"></div>
 
       <div class="currentWord">
@@ -437,7 +472,7 @@
       <div class="modalBox">
         <div class="modalTop">
           <div class="badge" id="mcqBadge">MCQ</div>
-          <div class="badge" id="mustPass">Correct required</div>
+          <div class="badge">Correct required</div>
         </div>
         <div class="q" id="mcqQuestion"></div>
         <div id="mcqOptions"></div>
@@ -457,198 +492,63 @@
 ======================= */
 const ROWS = 6;
 const COLS = 6;
-
-// add a couple extra letters so wheel is not “too obvious”
 const EXTRA_LETTERS = 2;
 
-// IMPORTANT for your experiment:
-// If you want the *exact same option order* for control-group MCQs, set this to false.
+// If you need identical option order for control group MCQ-only page, set false
 const SHUFFLE_MCQ_OPTIONS = true;
 
 /* =======================
-   ROUNDS (12 security words + hints + MCQs)
+   ROUNDS (12 browser security words)
 ======================= */
 const rounds = [
-  {
-    word: "SECURITY",
-    theme: "Browser Protection",
-    hint: "A browser must protect users from online threats.",
-    mcq: {
-      q: "Which is the best meaning of browser security?",
-      options: [
-        "Making the browser look attractive",
-        "Protecting users from threats and unsafe websites",
-        "Increasing screen brightness",
-        "Reducing monitor size"
-      ],
-      answerIndex: 1
-    }
-  },
-  {
-    word: "PRIVACY",
-    theme: "Data Protection",
-    hint: "Browsers differ in how they handle user data.",
-    mcq: {
-      q: "What does browser privacy mainly focus on?",
-      options: [
-        "Preventing collection and misuse of user data",
-        "Improving speaker volume",
-        "Increasing download speed only",
-        "Changing wallpaper automatically"
-      ],
-      answerIndex: 0
-    }
-  },
-  {
-    word: "UPDATES",
-    theme: "Vulnerability Fixes",
-    hint: "Regular fixes help close known vulnerabilities.",
-    mcq: {
-      q: "Why are regular browser updates important?",
-      options: [
-        "They add random pop-ups",
-        "They remove the keyboard",
-        "They fix security issues and bugs",
-        "They disable encryption"
-      ],
-      answerIndex: 2
-    }
-  },
-  {
-    word: "MALWARE",
-    theme: "Threat Awareness",
-    hint: "Some software is designed to harm systems or steal data.",
-    mcq: {
-      q: "Malware is best described as:",
-      options: [
-        "A helpful system tool",
-        "A security patch",
-        "A type of internet cable",
-        "Software intended to harm or steal information"
-      ],
-      answerIndex: 3
-    }
-  },
-  {
-    word: "HTTPS",
-    theme: "Secure Connection",
-    hint: "Secure communication protects data during transmission.",
-    mcq: {
-      q: "HTTPS is important because it:",
-      options: [
-        "Helps secure data exchanged between browser and website",
-        "Makes the website offline",
-        "Blocks all cookies automatically",
-        "Turns off the network card"
-      ],
-      answerIndex: 0
-    }
-  },
-  {
-    word: "ENCRYPT",
-    theme: "Confidentiality",
-    hint: "Sensitive data should not be readable in plain form.",
-    mcq: {
-      q: "Encryption means:",
-      options: [
-        "Deleting data permanently",
-        "Converting data into unreadable form without a key",
-        "Increasing screen resolution",
-        "Adding more bookmarks"
-      ],
-      answerIndex: 1
-    }
-  },
-  {
-    word: "SANDBOX",
-    theme: "Isolation",
-    hint: "Isolation helps prevent malicious code from spreading.",
-    mcq: {
-      q: "Sandboxing in a browser helps by:",
-      options: [
-        "Running content in isolation to limit damage",
-        "Saving passwords in plain text",
-        "Allowing all extensions without checks",
-        "Disabling updates permanently"
-      ],
-      answerIndex: 0
-    }
-  },
-  {
-    word: "CERT",
-    theme: "Trust & Certificates",
-    hint: "Websites use digital proof to establish trust.",
-    mcq: {
-      q: "A digital certificate is mainly used to:",
-      options: [
-        "Increase the size of images",
-        "Prove a website’s identity and enable secure connection",
-        "Add more advertisements",
-        "Disable HTTPS"
-      ],
-      answerIndex: 1
-    }
-  },
-  {
-    word: "PASSWORD",
-    theme: "Account Safety",
-    hint: "Weak credentials make accounts vulnerable.",
-    mcq: {
-      q: "Which password practice is the safest?",
-      options: [
-        "Using the same password everywhere",
-        "Using short passwords like 12345",
-        "Using strong, unique passwords for important accounts",
-        "Sharing passwords with friends"
-      ],
-      answerIndex: 2
-    }
-  },
-  {
-    word: "COOKIES",
-    theme: "Tracking Controls",
-    hint: "Small files can track user activity across websites.",
-    mcq: {
-      q: "Cookies are primarily used to:",
-      options: [
-        "Store small pieces of data like session and preferences",
-        "Repair a hard disk",
-        "Encrypt all web traffic automatically",
-        "Turn off the browser"
-      ],
-      answerIndex: 0
-    }
-  },
-  {
-    word: "TRACKING",
-    theme: "Online Behaviour",
-    hint: "Some websites follow user behaviour online.",
-    mcq: {
-      q: "Online tracking generally refers to:",
-      options: [
-        "Monitoring user activity for ads/analytics across sites",
-        "Cleaning the computer screen",
-        "Increasing browser window size",
-        "Storing files only on USB drive"
-      ],
-      answerIndex: 0
-    }
-  },
-  {
-    word: "EXTENSION",
-    theme: "Add-ons Risk",
-    hint: "Add-ons can improve features but may introduce risks.",
-    mcq: {
-      q: "Which is a security risk with browser extensions?",
-      options: [
-        "They always improve privacy",
-        "They can request excessive permissions and misuse data",
-        "They automatically remove malware",
-        "They replace HTTPS with HTTP"
-      ],
-      answerIndex: 1
-    }
-  },
+  { word:"SECURITY", theme:"Browser Protection", hint:"A browser must protect users from online threats.",
+    mcq:{ q:"Which is the best meaning of browser security?",
+      options:["Making the browser look attractive","Protecting users from threats and unsafe websites","Increasing screen brightness","Reducing monitor size"],
+      answerIndex:1 } },
+  { word:"PRIVACY", theme:"Data Protection", hint:"Browsers differ in how they handle user data.",
+    mcq:{ q:"What does browser privacy mainly focus on?",
+      options:["Preventing collection and misuse of user data","Improving speaker volume","Increasing download speed only","Changing wallpaper automatically"],
+      answerIndex:0 } },
+  { word:"UPDATES", theme:"Vulnerability Fixes", hint:"Regular fixes help close known vulnerabilities.",
+    mcq:{ q:"Why are regular browser updates important?",
+      options:["They add random pop-ups","They remove the keyboard","They fix security issues and bugs","They disable encryption"],
+      answerIndex:2 } },
+  { word:"MALWARE", theme:"Threat Awareness", hint:"Some software is designed to harm systems or steal data.",
+    mcq:{ q:"Malware is best described as:",
+      options:["A helpful system tool","A security patch","A type of internet cable","Software intended to harm or steal information"],
+      answerIndex:3 } },
+  { word:"HTTPS", theme:"Secure Connection", hint:"Secure communication protects data during transmission.",
+    mcq:{ q:"HTTPS is important because it:",
+      options:["Helps secure data exchanged between browser and website","Makes the website offline","Blocks all cookies automatically","Turns off the network card"],
+      answerIndex:0 } },
+  { word:"ENCRYPT", theme:"Confidentiality", hint:"Sensitive data should not be readable in plain form.",
+    mcq:{ q:"Encryption means:",
+      options:["Deleting data permanently","Converting data into unreadable form without a key","Increasing screen resolution","Adding more bookmarks"],
+      answerIndex:1 } },
+  { word:"SANDBOX", theme:"Isolation", hint:"Isolation helps prevent malicious code from spreading.",
+    mcq:{ q:"Sandboxing in a browser helps by:",
+      options:["Running content in isolation to limit damage","Saving passwords in plain text","Allowing all extensions without checks","Disabling updates permanently"],
+      answerIndex:0 } },
+  { word:"CERT", theme:"Trust & Certificates", hint:"Websites use digital proof to establish trust.",
+    mcq:{ q:"A digital certificate is mainly used to:",
+      options:["Increase the size of images","Prove a website’s identity and enable secure connection","Add more advertisements","Disable HTTPS"],
+      answerIndex:1 } },
+  { word:"PASSWORD", theme:"Account Safety", hint:"Weak credentials make accounts vulnerable.",
+    mcq:{ q:"Which password practice is the safest?",
+      options:["Using the same password everywhere","Using short passwords like 12345","Using strong, unique passwords for important accounts","Sharing passwords with friends"],
+      answerIndex:2 } },
+  { word:"COOKIES", theme:"Tracking Controls", hint:"Small files can track user activity across websites.",
+    mcq:{ q:"Cookies are primarily used to:",
+      options:["Store small pieces of data like session and preferences","Repair a hard disk","Encrypt all web traffic automatically","Turn off the browser"],
+      answerIndex:0 } },
+  { word:"TRACKING", theme:"Online Behaviour", hint:"Some websites follow user behaviour online.",
+    mcq:{ q:"Online tracking generally refers to:",
+      options:["Monitoring user activity for ads/analytics across sites","Cleaning the computer screen","Increasing browser window size","Storing files only on USB drive"],
+      answerIndex:0 } },
+  { word:"EXTENSION", theme:"Add-ons Risk", hint:"Add-ons can improve features but may introduce risks.",
+    mcq:{ q:"Which is a security risk with browser extensions?",
+      options:["They always improve privacy","They can request excessive permissions and misuse data","They automatically remove malware","They replace HTTPS with HTTP"],
+      answerIndex:1 } },
 ];
 
 /* =======================
@@ -665,13 +565,10 @@ let placement = null;
 let gridState = makeEmptyGrid();
 
 /* =======================
-   DOM
+   DOM HELPERS
 ======================= */
 const $ = (id) => document.getElementById(id);
 
-/* =======================
-   HELPERS
-======================= */
 function shuffle(arr){
   const a = arr.slice();
   for(let i=a.length-1;i>0;i--){
@@ -680,8 +577,22 @@ function shuffle(arr){
   }
   return a;
 }
-function randInt(min,max){
-  return Math.floor(Math.random()*(max-min+1))+min;
+function randInt(min,max){ return Math.floor(Math.random()*(max-min+1))+min; }
+
+/* =======================
+   WORD LIST PANEL
+======================= */
+function renderWordList(){
+  const el = $("wordList");
+  el.innerHTML = "";
+  rounds.forEach((r, idx)=>{
+    const chip = document.createElement("div");
+    chip.className = "chip";
+    if(validated.has(r.word)) chip.classList.add("done");
+    if(idx === currentRoundIndex) chip.classList.add("current");
+    chip.textContent = r.word;
+    el.appendChild(chip);
+  });
 }
 
 /* =======================
@@ -817,7 +728,6 @@ function startSelect(e, idx){
   lastPointer = getLocalPoint(e);
   updateCurrentWord();
 }
-
 function continueSelect(e, idx){
   if(!isSelecting) return;
   if(e.buttons === 0) return;
@@ -825,13 +735,11 @@ function continueSelect(e, idx){
   lastPointer = getLocalPoint(e);
   updateCurrentWord();
 }
-
 function onPointerMove(e){
   if(!isSelecting) return;
   lastPointer = getLocalPoint(e);
   updateSwipePath(true);
 }
-
 function endSelect(){
   if(!isSelecting) return;
   isSelecting = false;
@@ -854,7 +762,8 @@ function resetSelection(){
   selectedIndices = [];
   currentWord = "";
   document.querySelectorAll(".letter").forEach(el=>el.classList.remove("selected"));
-  $("swipePath").setAttribute("d","");
+  const p = document.getElementById("swipePath");
+  if(p) p.setAttribute("d","");
   updateCurrentWord();
 }
 
@@ -864,7 +773,6 @@ function getLocalPoint(e){
   const y = (e.clientY - rect.top)  * (280 / rect.height);
   return {x,y};
 }
-
 function getLetterCenter(idx){
   const el = document.querySelector(`.letter[data-index="${idx}"]`);
   if(!el) return {x:140,y:140};
@@ -874,23 +782,24 @@ function getLetterCenter(idx){
   const cy = ( (r.top  + r.height/2) - wheelRect.top )  * (280 / wheelRect.height);
   return {x:cx, y:cy};
 }
-
 function updateSwipePath(withPointer=false){
+  const p = document.getElementById("swipePath");
+  if(!p) return;
+
   const pts = selectedIndices.map(getLetterCenter);
   if(withPointer && isSelecting && pts.length>0){
     pts.push(lastPointer);
   }
   if(pts.length<2){
-    $("swipePath").setAttribute("d","");
+    p.setAttribute("d","");
     return;
   }
   let d = `M ${pts[0].x.toFixed(2)} ${pts[0].y.toFixed(2)}`;
   for(let i=1;i<pts.length;i++){
     d += ` L ${pts[i].x.toFixed(2)} ${pts[i].y.toFixed(2)}`;
   }
-  $("swipePath").setAttribute("d", d);
+  p.setAttribute("d", d);
 }
-
 function updateCurrentWord(){
   $("currentWord").textContent = currentWord || " ";
 }
@@ -910,7 +819,6 @@ function openMCQ(round){
   const optionItems = round.mcq.options.map((t,i)=>({t,i}));
   const rendered = SHUFFLE_MCQ_OPTIONS ? shuffle(optionItems) : optionItems;
 
-  // store where the correct option moved
   opts.dataset.correct = String(rendered.findIndex(x => x.i === round.mcq.answerIndex));
 
   rendered.forEach((o, idx)=>{
@@ -923,33 +831,36 @@ function openMCQ(round){
     opts.appendChild(div);
   });
 }
-
-function closeMCQ(){
-  $("mcqModal").style.display = "none";
-}
+function closeMCQ(){ $("mcqModal").style.display = "none"; }
 
 /* =======================
-   ROUND FLOW
+   ROUND FLOW  (PATTERN FIX IS HERE)
 ======================= */
 function setRound(i){
   currentRoundIndex = i;
   const round = rounds[currentRoundIndex];
 
+  // top info
   $("decisionHint").textContent = `Theme: ${round.theme}`;
   $("hintText").innerHTML = `<b>Hint:</b> ${round.hint}`;
   $("progressText").textContent = `${validated.size} / ${rounds.length}`;
 
-  // New crossword placement every round
+  // ✅ placement first
   placement = choosePlacement(round.word);
   applyPlacement(round.word, placement);
 
-  // New wheel pattern every round
+  // ✅ pattern text after placement exists (FIX)
+  const rowLabel = placement.r0 + 1;
+  const colLabel = String.fromCharCode(65 + placement.c0);
+  const pattern = `${placement.dir}-${rowLabel}${colLabel}`;
+  $("patternText").textContent = `Pattern: ${pattern}`;
+
+  // new wheel letters each round
   wheelLetters = buildWheelLetters(round.word);
   renderWheel();
 
-  const pattern = `${placement.dir}-${placement.r0+1}${String.fromCharCode(65+placement.c0)}`;
-  $("patternText").textContent = `Pattern: ${pattern}`;
-
+  // refresh list panel + word box
+  renderWordList();
   resetSelection();
 }
 
@@ -959,7 +870,6 @@ function addToken(){
   $("tokenRow").appendChild(t);
   $("tokenCount").textContent = String(validated.size);
 }
-
 function checkCompletion(){
   $("progressText").textContent = `${validated.size} / ${rounds.length}`;
   if(validated.size === rounds.length){
@@ -1014,10 +924,13 @@ $("mcqSubmit").addEventListener("click", ()=>{
 
   const round = rounds[currentRoundIndex];
   validated.add(round.word);
+
   revealWordOnGrid();
   addToken();
   closeMCQ();
   resetSelection();
+
+  renderWordList();
 
   const next = currentRoundIndex + 1;
   if(next < rounds.length){
@@ -1031,6 +944,7 @@ $("mcqSubmit").addEventListener("click", ()=>{
 ======================= */
 (function init(){
   $("progressText").textContent = `0 / ${rounds.length}`;
+  renderWordList();
   setRound(0);
 })();
 </script>
