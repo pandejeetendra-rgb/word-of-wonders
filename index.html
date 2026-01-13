@@ -11,8 +11,6 @@
       --card:#ffffffee;
       --ink:#1f2a37;
       --muted:#6b7280;
-      --brand:#3b82f6;
-      --good:#22c55e;
       --shadow: 0 10px 25px rgba(0,0,0,.15);
       --shadow2: 0 6px 16px rgba(0,0,0,.12);
       --radius: 18px;
@@ -33,7 +31,7 @@
       padding:18px 12px 28px;
     }
 
-    .wrap{ width:min(500px, 96vw); }
+    .wrap{ width:min(520px, 96vw); }
 
     header{
       display:flex;
@@ -50,16 +48,8 @@
       color:white;
       text-align:left;
     }
-    .title h1{
-      margin:0;
-      font-size:18px;
-      font-weight:800;
-      letter-spacing:.2px;
-    }
-    .title small{
-      opacity:.9;
-      font-size:12px;
-    }
+    .title h1{ margin:0; font-size:18px; font-weight:800; }
+    .title small{ opacity:.9; font-size:12px; }
 
     .pill{
       background: rgba(255,255,255,.18);
@@ -97,13 +87,10 @@
       text-align:left;
     }
     .sectionTitle .left b{ font-size:14px; }
-    .sectionTitle .left span{
-      font-size:12px;
-      color:var(--muted);
-    }
+    .sectionTitle .left span{ font-size:12px; color:var(--muted); }
     .progress{ font-size:12px; color:var(--muted); white-space:nowrap; }
 
-    /* Word list panel (WoW feel) */
+    /* Word list panel */
     .wordList{
       display:flex;
       flex-wrap:wrap;
@@ -131,15 +118,13 @@
       border-color: rgba(34,197,94,.35);
       color:#166534;
     }
-    .chip.current{
-      outline: 2px solid rgba(59,130,246,.55);
-    }
+    .chip.current{ outline: 2px solid rgba(59,130,246,.55); }
 
-    /* Crossword grid */
+    /* ✅ Crossword grid now 10×10 */
     .grid{
       display:grid;
-      grid-template-columns: repeat(6, 1fr);
-      gap:8px;
+      grid-template-columns: repeat(10, 1fr);
+      gap:6px;
       padding:8px;
       background: rgba(255,255,255,.55);
       border-radius: 16px;
@@ -148,13 +133,13 @@
     }
     .cell{
       aspect-ratio: 1 / 1;
-      border-radius: 12px;
+      border-radius: 10px;
       background: linear-gradient(180deg, #fff, #eef2ff);
       display:flex;
       align-items:center;
       justify-content:center;
       font-weight:900;
-      font-size:16px;
+      font-size:13px;
       color:#111827;
       position:relative;
       user-select:none;
@@ -166,10 +151,7 @@
       color:transparent;
     }
     .cell.reveal{ animation: pop .18s ease-out; }
-    @keyframes pop{
-      from{transform:scale(.96); filter:brightness(.95)}
-      to{transform:scale(1); filter:brightness(1)}
-    }
+    @keyframes pop{ from{transform:scale(.96)} to{transform:scale(1)} }
     .cell.locked::after{
       content:"";
       position:absolute;
@@ -178,7 +160,6 @@
       pointer-events:none;
     }
 
-    /* Current word + hint */
     .currentWord{
       margin:12px 2px 8px;
       display:flex;
@@ -219,7 +200,6 @@
     }
     .hintLine b{ color:#334155; }
 
-    /* Wheel */
     .wheelWrap{
       margin-top:10px;
       background: rgba(255,255,255,.55);
@@ -239,7 +219,7 @@
       font-size:12px;
       gap:10px;
     }
-    .wheelHeader span{ text-align:left; }
+
     .wheel{
       width: 280px;
       height: 280px;
@@ -270,11 +250,7 @@
     .letter.selected{
       background: linear-gradient(180deg, #22c55e, #16a34a);
     }
-    .wheel svg{
-      position:absolute;
-      inset:0;
-      pointer-events:none;
-    }
+    .wheel svg{ position:absolute; inset:0; pointer-events:none; }
     .wheel path{
       stroke: rgba(34,197,94,.9);
       stroke-width: 10;
@@ -304,12 +280,8 @@
       background: linear-gradient(180deg, #111827, #0b1220);
       color:#fff;
     }
-    .btn.ghost{
-      background: rgba(255,255,255,.75);
-      color:var(--ink);
-    }
+    .btn.ghost{ background: rgba(255,255,255,.75); }
 
-    /* Tokens */
     .tokens{
       margin-top:12px;
       display:flex;
@@ -322,10 +294,7 @@
       border: 1px solid rgba(255,255,255,.7);
       box-shadow: var(--shadow2);
     }
-    .tokenRow{
-      display:flex; gap:6px; flex-wrap:wrap;
-      justify-content:flex-end;
-    }
+    .tokenRow{ display:flex; gap:6px; flex-wrap:wrap; justify-content:flex-end; }
     .token{
       width:18px; height:18px; border-radius:50%;
       background: radial-gradient(circle at 30% 30%, #86efac, #22c55e);
@@ -333,7 +302,6 @@
       border:1px solid rgba(255,255,255,.55);
     }
 
-    /* MCQ modal */
     .modal{
       display:none;
       position:fixed;
@@ -367,40 +335,22 @@
       font-size:12px;
       font-weight:800;
     }
-    .q{
-      margin:10px 0 8px;
-      font-weight:800;
-      line-height:1.35;
-    }
+    .q{ margin:10px 0 8px; font-weight:800; line-height:1.35; }
     .opt{
-      display:flex;
-      gap:10px;
-      align-items:flex-start;
-      padding:10px;
-      border-radius: 12px;
-      border:1px solid #e5e7eb;
-      margin:8px 0;
-      cursor:pointer;
+      display:flex; gap:10px; align-items:flex-start;
+      padding:10px; border-radius: 12px; border:1px solid #e5e7eb;
+      margin:8px 0; cursor:pointer;
     }
     .opt:hover{background:#f9fafb}
     .opt input{margin-top:3px}
-    .modalActions{
-      display:flex;
-      gap:10px;
-      justify-content:flex-end;
-      margin-top:10px;
-      flex-wrap:wrap;
-    }
-    .msg{
-      margin-top:8px;
-      font-size:12px;
-      color:var(--muted);
-    }
+    .modalActions{ display:flex; gap:10px; justify-content:flex-end; margin-top:10px; flex-wrap:wrap; }
+    .msg{ margin-top:8px; font-size:12px; color:var(--muted); }
 
     @media (max-width:380px){
       .wheel{ width: 250px; height: 250px; }
       .letter{ width:50px; height:50px; font-size:17px; }
-      .grid{ gap:7px; }
+      .grid{ gap:5px; }
+      .cell{ font-size:12px; }
       .decision{ min-width:120px; }
     }
   </style>
@@ -422,12 +372,11 @@
       <div class="sectionTitle">
         <div class="left">
           <b>Crossword Board</b>
-          <span id="levelHint">Complete all words to finish the level</span>
+          <span>Complete all words to finish the level</span>
         </div>
         <div class="progress" id="progressText">0 / 0</div>
       </div>
 
-      <!-- NEW: word list -->
       <div class="wordList" id="wordList"></div>
 
       <div class="grid" id="grid"></div>
@@ -467,7 +416,6 @@
       </div>
     </div>
 
-    <!-- MCQ modal -->
     <div class="modal" id="mcqModal">
       <div class="modalBox">
         <div class="modalTop">
@@ -487,466 +435,427 @@
   </div>
 
 <script>
-/* =======================
-   SETTINGS
-======================= */
-const ROWS = 6;
-const COLS = 6;
-const EXTRA_LETTERS = 2;
+  /* SETTINGS */
+  const ROWS = 10;
+  const COLS = 10;
+  const EXTRA_LETTERS = 2;
+  const SHUFFLE_MCQ_OPTIONS = true;
 
-// If you need identical option order for control group MCQ-only page, set false
-const SHUFFLE_MCQ_OPTIONS = true;
+  const rounds = [
+    { word:"SECURITY", theme:"Browser Protection", hint:"A browser must protect users from online threats.",
+      mcq:{ q:"Which is the best meaning of browser security?",
+        options:["Making the browser look attractive","Protecting users from threats and unsafe websites","Increasing screen brightness","Reducing monitor size"],
+        answerIndex:1 } },
+    { word:"PRIVACY", theme:"Data Protection", hint:"Browsers differ in how they handle user data.",
+      mcq:{ q:"What does browser privacy mainly focus on?",
+        options:["Preventing collection and misuse of user data","Improving speaker volume","Increasing download speed only","Changing wallpaper automatically"],
+        answerIndex:0 } },
+    { word:"UPDATES", theme:"Vulnerability Fixes", hint:"Regular fixes help close known vulnerabilities.",
+      mcq:{ q:"Why are regular browser updates important?",
+        options:["They add random pop-ups","They remove the keyboard","They fix security issues and bugs","They disable encryption"],
+        answerIndex:2 } },
+    { word:"MALWARE", theme:"Threat Awareness", hint:"Some software is designed to harm systems or steal data.",
+      mcq:{ q:"Malware is best described as:",
+        options:["A helpful system tool","A security patch","A type of internet cable","Software intended to harm or steal information"],
+        answerIndex:3 } },
+    { word:"HTTPS", theme:"Secure Connection", hint:"Secure communication protects data during transmission.",
+      mcq:{ q:"HTTPS is important because it:",
+        options:["Helps secure data exchanged between browser and website","Makes the website offline","Blocks all cookies automatically","Turns off the network card"],
+        answerIndex:0 } },
+    { word:"ENCRYPT", theme:"Confidentiality", hint:"Sensitive data should not be readable in plain form.",
+      mcq:{ q:"Encryption means:",
+        options:["Deleting data permanently","Converting data into unreadable form without a key","Increasing screen resolution","Adding more bookmarks"],
+        answerIndex:1 } },
+    { word:"SANDBOX", theme:"Isolation", hint:"Isolation helps prevent malicious code from spreading.",
+      mcq:{ q:"Sandboxing in a browser helps by:",
+        options:["Running content in isolation to limit damage","Saving passwords in plain text","Allowing all extensions without checks","Disabling updates permanently"],
+        answerIndex:0 } },
+    { word:"CERT", theme:"Trust & Certificates", hint:"Websites use digital proof to establish trust.",
+      mcq:{ q:"A digital certificate is mainly used to:",
+        options:["Increase the size of images","Prove a website’s identity and enable secure connection","Add more advertisements","Disable HTTPS"],
+        answerIndex:1 } },
+    { word:"PASSWORD", theme:"Account Safety", hint:"Weak credentials make accounts vulnerable.",
+      mcq:{ q:"Which password practice is the safest?",
+        options:["Using the same password everywhere","Using short passwords like 12345","Using strong, unique passwords for important accounts","Sharing passwords with friends"],
+        answerIndex:2 } },
+    { word:"COOKIES", theme:"Tracking Controls", hint:"Small files can track user activity across websites.",
+      mcq:{ q:"Cookies are primarily used to:",
+        options:["Store small pieces of data like session and preferences","Repair a hard disk","Encrypt all web traffic automatically","Turn off the browser"],
+        answerIndex:0 } },
+    { word:"TRACKING", theme:"Online Behaviour", hint:"Some websites follow user behaviour online.",
+      mcq:{ q:"Online tracking generally refers to:",
+        options:["Monitoring user activity for ads/analytics across sites","Cleaning the computer screen","Increasing browser window size","Storing files only on USB drive"],
+        answerIndex:0 } },
+    { word:"EXTENSION", theme:"Add-ons Risk", hint:"Add-ons can improve features but may introduce risks.",
+      mcq:{ q:"Which is a security risk with browser extensions?",
+        options:["They always improve privacy","They can request excessive permissions and misuse data","They automatically remove malware","They replace HTTPS with HTTP"],
+        answerIndex:1 } },
+  ];
 
-/* =======================
-   ROUNDS (12 browser security words)
-======================= */
-const rounds = [
-  { word:"SECURITY", theme:"Browser Protection", hint:"A browser must protect users from online threats.",
-    mcq:{ q:"Which is the best meaning of browser security?",
-      options:["Making the browser look attractive","Protecting users from threats and unsafe websites","Increasing screen brightness","Reducing monitor size"],
-      answerIndex:1 } },
-  { word:"PRIVACY", theme:"Data Protection", hint:"Browsers differ in how they handle user data.",
-    mcq:{ q:"What does browser privacy mainly focus on?",
-      options:["Preventing collection and misuse of user data","Improving speaker volume","Increasing download speed only","Changing wallpaper automatically"],
-      answerIndex:0 } },
-  { word:"UPDATES", theme:"Vulnerability Fixes", hint:"Regular fixes help close known vulnerabilities.",
-    mcq:{ q:"Why are regular browser updates important?",
-      options:["They add random pop-ups","They remove the keyboard","They fix security issues and bugs","They disable encryption"],
-      answerIndex:2 } },
-  { word:"MALWARE", theme:"Threat Awareness", hint:"Some software is designed to harm systems or steal data.",
-    mcq:{ q:"Malware is best described as:",
-      options:["A helpful system tool","A security patch","A type of internet cable","Software intended to harm or steal information"],
-      answerIndex:3 } },
-  { word:"HTTPS", theme:"Secure Connection", hint:"Secure communication protects data during transmission.",
-    mcq:{ q:"HTTPS is important because it:",
-      options:["Helps secure data exchanged between browser and website","Makes the website offline","Blocks all cookies automatically","Turns off the network card"],
-      answerIndex:0 } },
-  { word:"ENCRYPT", theme:"Confidentiality", hint:"Sensitive data should not be readable in plain form.",
-    mcq:{ q:"Encryption means:",
-      options:["Deleting data permanently","Converting data into unreadable form without a key","Increasing screen resolution","Adding more bookmarks"],
-      answerIndex:1 } },
-  { word:"SANDBOX", theme:"Isolation", hint:"Isolation helps prevent malicious code from spreading.",
-    mcq:{ q:"Sandboxing in a browser helps by:",
-      options:["Running content in isolation to limit damage","Saving passwords in plain text","Allowing all extensions without checks","Disabling updates permanently"],
-      answerIndex:0 } },
-  { word:"CERT", theme:"Trust & Certificates", hint:"Websites use digital proof to establish trust.",
-    mcq:{ q:"A digital certificate is mainly used to:",
-      options:["Increase the size of images","Prove a website’s identity and enable secure connection","Add more advertisements","Disable HTTPS"],
-      answerIndex:1 } },
-  { word:"PASSWORD", theme:"Account Safety", hint:"Weak credentials make accounts vulnerable.",
-    mcq:{ q:"Which password practice is the safest?",
-      options:["Using the same password everywhere","Using short passwords like 12345","Using strong, unique passwords for important accounts","Sharing passwords with friends"],
-      answerIndex:2 } },
-  { word:"COOKIES", theme:"Tracking Controls", hint:"Small files can track user activity across websites.",
-    mcq:{ q:"Cookies are primarily used to:",
-      options:["Store small pieces of data like session and preferences","Repair a hard disk","Encrypt all web traffic automatically","Turn off the browser"],
-      answerIndex:0 } },
-  { word:"TRACKING", theme:"Online Behaviour", hint:"Some websites follow user behaviour online.",
-    mcq:{ q:"Online tracking generally refers to:",
-      options:["Monitoring user activity for ads/analytics across sites","Cleaning the computer screen","Increasing browser window size","Storing files only on USB drive"],
-      answerIndex:0 } },
-  { word:"EXTENSION", theme:"Add-ons Risk", hint:"Add-ons can improve features but may introduce risks.",
-    mcq:{ q:"Which is a security risk with browser extensions?",
-      options:["They always improve privacy","They can request excessive permissions and misuse data","They automatically remove malware","They replace HTTPS with HTTP"],
-      answerIndex:1 } },
-];
+  /* STATE */
+  let currentRoundIndex = 0;
+  let validated = new Set();
 
-/* =======================
-   STATE
-======================= */
-let currentRoundIndex = 0;
-let validated = new Set();
+  let wheelLetters = [];
+  let selectedIndices = [];
+  let currentWord = "";
 
-let wheelLetters = [];
-let selectedIndices = [];
-let currentWord = "";
+  let placement = null;
+  let gridState = makeEmptyGrid();
 
-let placement = null;
-let gridState = makeEmptyGrid();
+  const $ = (id) => document.getElementById(id);
 
-/* =======================
-   DOM HELPERS
-======================= */
-const $ = (id) => document.getElementById(id);
-
-function shuffle(arr){
-  const a = arr.slice();
-  for(let i=a.length-1;i>0;i--){
-    const j = Math.floor(Math.random()*(i+1));
-    [a[i],a[j]] = [a[j],a[i]];
-  }
-  return a;
-}
-function randInt(min,max){ return Math.floor(Math.random()*(max-min+1))+min; }
-
-/* =======================
-   WORD LIST PANEL
-======================= */
-function renderWordList(){
-  const el = $("wordList");
-  el.innerHTML = "";
-  rounds.forEach((r, idx)=>{
-    const chip = document.createElement("div");
-    chip.className = "chip";
-    if(validated.has(r.word)) chip.classList.add("done");
-    if(idx === currentRoundIndex) chip.classList.add("current");
-    chip.textContent = r.word;
-    el.appendChild(chip);
-  });
-}
-
-/* =======================
-   GRID
-======================= */
-function makeEmptyGrid(){
-  const grid = [];
-  for(let r=0;r<ROWS;r++){
-    const row = [];
-    for(let c=0;c<COLS;c++){
-      row.push({ letter:"", active:false, revealed:false });
+  function shuffle(arr){
+    const a = arr.slice();
+    for(let i=a.length-1;i>0;i--){
+      const j = Math.floor(Math.random()*(i+1));
+      [a[i],a[j]] = [a[j],a[i]];
     }
-    grid.push(row);
+    return a;
   }
-  return grid;
-}
+  function randInt(min,max){ return Math.floor(Math.random()*(max-min+1))+min; }
 
-function choosePlacement(word){
-  const dir = Math.random() < 0.5 ? "H" : "V";
-  if(dir === "H"){
-    const r0 = randInt(0, ROWS-1);
-    const c0 = randInt(0, COLS-word.length);
-    const cells = [];
-    for(let i=0;i<word.length;i++) cells.push({r:r0, c:c0+i});
-    return {r0,c0,dir,cells};
-  }else{
-    const r0 = randInt(0, ROWS-word.length);
-    const c0 = randInt(0, COLS-1);
-    const cells = [];
-    for(let i=0;i<word.length;i++) cells.push({r:r0+i, c:c0});
-    return {r0,c0,dir,cells};
+  function renderWordList(){
+    const el = $("wordList");
+    el.innerHTML = "";
+    rounds.forEach((r, idx)=>{
+      const chip = document.createElement("div");
+      chip.className = "chip";
+      if(validated.has(r.word)) chip.classList.add("done");
+      if(idx === currentRoundIndex) chip.classList.add("current");
+      chip.textContent = r.word;
+      el.appendChild(chip);
+    });
   }
-}
 
-function applyPlacement(word, pl){
-  gridState = makeEmptyGrid();
-  pl.cells.forEach((pos, i)=>{
-    gridState[pos.r][pos.c].letter = word[i];
-    gridState[pos.r][pos.c].active = true;
-    gridState[pos.r][pos.c].revealed = validated.has(word);
-  });
-  renderGrid();
-}
+  function makeEmptyGrid(){
+    const grid = [];
+    for(let r=0;r<ROWS;r++){
+      const row = [];
+      for(let c=0;c<COLS;c++){
+        row.push({ letter:"", active:false, revealed:false });
+      }
+      grid.push(row);
+    }
+    return grid;
+  }
 
-function renderGrid(){
-  const gridEl = $("grid");
-  gridEl.innerHTML = "";
-  for(let r=0;r<ROWS;r++){
-    for(let c=0;c<COLS;c++){
-      const cell = gridState[r][c];
-      const d = document.createElement("div");
-      d.className = "cell";
-      if(!cell.active) d.classList.add("blank");
-      if(cell.active) d.classList.add("locked");
-      if(cell.revealed) d.classList.add("reveal");
-      d.textContent = cell.revealed ? cell.letter : (cell.active ? "" : "");
-      gridEl.appendChild(d);
+  function choosePlacement(word){
+    // now always fits because COLS/ROWS = 10, max word length = 9
+    const dir = Math.random() < 0.5 ? "H" : "V";
+    if(dir === "H"){
+      const r0 = randInt(0, ROWS-1);
+      const c0 = randInt(0, COLS-word.length);
+      const cells = [];
+      for(let i=0;i<word.length;i++) cells.push({r:r0, c:c0+i});
+      return {r0,c0,dir,cells};
+    }else{
+      const r0 = randInt(0, ROWS-word.length);
+      const c0 = randInt(0, COLS-1);
+      const cells = [];
+      for(let i=0;i<word.length;i++) cells.push({r:r0+i, c:c0});
+      return {r0,c0,dir,cells};
     }
   }
-}
 
-function revealWordOnGrid(){
-  placement.cells.forEach((pos)=>{
-    gridState[pos.r][pos.c].revealed = true;
-  });
-  renderGrid();
-}
-
-/* =======================
-   WHEEL
-======================= */
-function buildWheelLetters(word){
-  const base = word.split("");
-  const alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("");
-  const extras = [];
-  for(let i=0;i<EXTRA_LETTERS;i++){
-    extras.push(alphabet[randInt(0, alphabet.length-1)]);
-  }
-  return shuffle(base.concat(extras));
-}
-
-function renderWheel(){
-  const wheel = $("wheel");
-  wheel.innerHTML = `
-    <svg viewBox="0 0 280 280" preserveAspectRatio="none">
-      <path id="swipePath" d=""></path>
-    </svg>
-  `;
-
-  const centerX = 140, centerY = 140;
-  const radius = 95;
-  const n = wheelLetters.length;
-
-  const positions = [];
-  for(let i=0;i<n;i++){
-    const angle = (Math.PI*2*i/n) - Math.PI/2;
-    const x = centerX + radius*Math.cos(angle);
-    const y = centerY + radius*Math.sin(angle);
-    positions.push({x,y});
+  function applyPlacement(word, pl){
+    gridState = makeEmptyGrid();
+    pl.cells.forEach((pos, i)=>{
+      gridState[pos.r][pos.c].letter = word[i];
+      gridState[pos.r][pos.c].active = true;
+      gridState[pos.r][pos.c].revealed = validated.has(word);
+    });
+    renderGrid();
   }
 
-  wheelLetters.forEach((ch, i)=>{
-    const div = document.createElement("div");
-    div.className = "letter";
-    div.dataset.index = String(i);
-    div.textContent = ch;
-
-    const {x,y} = positions[i];
-    div.style.left = (x - 27) + "px";
-    div.style.top  = (y - 27) + "px";
-
-    div.addEventListener("pointerdown", (e)=>startSelect(e, i));
-    div.addEventListener("pointerenter", (e)=>continueSelect(e, i));
-
-    wheel.appendChild(div);
-  });
-
-  wheel.addEventListener("pointermove", onPointerMove);
-  window.addEventListener("pointerup", endSelect);
-
-  updateSwipePath();
-}
-
-let isSelecting = false;
-let lastPointer = {x:0,y:0};
-
-function startSelect(e, idx){
-  e.preventDefault();
-  isSelecting = true;
-  selectedIndices = [];
-  currentWord = "";
-  markSelected(idx);
-  lastPointer = getLocalPoint(e);
-  updateCurrentWord();
-}
-function continueSelect(e, idx){
-  if(!isSelecting) return;
-  if(e.buttons === 0) return;
-  markSelected(idx);
-  lastPointer = getLocalPoint(e);
-  updateCurrentWord();
-}
-function onPointerMove(e){
-  if(!isSelecting) return;
-  lastPointer = getLocalPoint(e);
-  updateSwipePath(true);
-}
-function endSelect(){
-  if(!isSelecting) return;
-  isSelecting = false;
-  updateSwipePath(false);
-}
-
-function markSelected(idx){
-  if(selectedIndices.includes(idx)) return;
-  selectedIndices.push(idx);
-  currentWord += wheelLetters[idx];
-
-  document.querySelectorAll(".letter").forEach(el=>{
-    const i = parseInt(el.dataset.index,10);
-    el.classList.toggle("selected", selectedIndices.includes(i));
-  });
-  updateSwipePath(true);
-}
-
-function resetSelection(){
-  selectedIndices = [];
-  currentWord = "";
-  document.querySelectorAll(".letter").forEach(el=>el.classList.remove("selected"));
-  const p = document.getElementById("swipePath");
-  if(p) p.setAttribute("d","");
-  updateCurrentWord();
-}
-
-function getLocalPoint(e){
-  const rect = $("wheel").getBoundingClientRect();
-  const x = (e.clientX - rect.left) * (280 / rect.width);
-  const y = (e.clientY - rect.top)  * (280 / rect.height);
-  return {x,y};
-}
-function getLetterCenter(idx){
-  const el = document.querySelector(`.letter[data-index="${idx}"]`);
-  if(!el) return {x:140,y:140};
-  const wheelRect = $("wheel").getBoundingClientRect();
-  const r = el.getBoundingClientRect();
-  const cx = ( (r.left + r.width/2) - wheelRect.left ) * (280 / wheelRect.width);
-  const cy = ( (r.top  + r.height/2) - wheelRect.top )  * (280 / wheelRect.height);
-  return {x:cx, y:cy};
-}
-function updateSwipePath(withPointer=false){
-  const p = document.getElementById("swipePath");
-  if(!p) return;
-
-  const pts = selectedIndices.map(getLetterCenter);
-  if(withPointer && isSelecting && pts.length>0){
-    pts.push(lastPointer);
+  function renderGrid(){
+    const gridEl = $("grid");
+    gridEl.innerHTML = "";
+    for(let r=0;r<ROWS;r++){
+      for(let c=0;c<COLS;c++){
+        const cell = gridState[r][c];
+        const d = document.createElement("div");
+        d.className = "cell";
+        if(!cell.active) d.classList.add("blank");
+        if(cell.active) d.classList.add("locked");
+        if(cell.revealed) d.classList.add("reveal");
+        d.textContent = cell.revealed ? cell.letter : (cell.active ? "" : "");
+        gridEl.appendChild(d);
+      }
+    }
   }
-  if(pts.length<2){
-    p.setAttribute("d","");
-    return;
+
+  function revealWordOnGrid(){
+    placement.cells.forEach((pos)=>{ gridState[pos.r][pos.c].revealed = true; });
+    renderGrid();
   }
-  let d = `M ${pts[0].x.toFixed(2)} ${pts[0].y.toFixed(2)}`;
-  for(let i=1;i<pts.length;i++){
-    d += ` L ${pts[i].x.toFixed(2)} ${pts[i].y.toFixed(2)}`;
+
+  function buildWheelLetters(word){
+    const base = word.split("");
+    const alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("");
+    const extras = [];
+    for(let i=0;i<EXTRA_LETTERS;i++){
+      extras.push(alphabet[randInt(0, alphabet.length-1)]);
+    }
+    return shuffle(base.concat(extras));
   }
-  p.setAttribute("d", d);
-}
-function updateCurrentWord(){
-  $("currentWord").textContent = currentWord || " ";
-}
 
-/* =======================
-   MCQ
-======================= */
-function openMCQ(round){
-  $("mcqModal").style.display = "block";
-  $("mcqBadge").textContent = `MCQ for word: ${round.word}`;
-  $("mcqQuestion").textContent = round.mcq.q;
-  $("mcqMsg").textContent = "Correct answer is required to validate the word (retry allowed).";
-
-  const opts = $("mcqOptions");
-  opts.innerHTML = "";
-
-  const optionItems = round.mcq.options.map((t,i)=>({t,i}));
-  const rendered = SHUFFLE_MCQ_OPTIONS ? shuffle(optionItems) : optionItems;
-
-  opts.dataset.correct = String(rendered.findIndex(x => x.i === round.mcq.answerIndex));
-
-  rendered.forEach((o, idx)=>{
-    const div = document.createElement("label");
-    div.className = "opt";
-    div.innerHTML = `
-      <input type="radio" name="mcq" value="${idx}">
-      <div><b>${String.fromCharCode(65+idx)}.</b> ${o.t}</div>
+  function renderWheel(){
+    const wheel = $("wheel");
+    wheel.innerHTML = `
+      <svg viewBox="0 0 280 280" preserveAspectRatio="none">
+        <path id="swipePath" d=""></path>
+      </svg>
     `;
-    opts.appendChild(div);
+
+    const centerX = 140, centerY = 140;
+    const radius = 95;
+    const n = wheelLetters.length;
+
+    const positions = [];
+    for(let i=0;i<n;i++){
+      const angle = (Math.PI*2*i/n) - Math.PI/2;
+      const x = centerX + radius*Math.cos(angle);
+      const y = centerY + radius*Math.sin(angle);
+      positions.push({x,y});
+    }
+
+    wheelLetters.forEach((ch, i)=>{
+      const div = document.createElement("div");
+      div.className = "letter";
+      div.dataset.index = String(i);
+      div.textContent = ch;
+
+      const {x,y} = positions[i];
+      div.style.left = (x - 27) + "px";
+      div.style.top  = (y - 27) + "px";
+
+      div.addEventListener("pointerdown", (e)=>startSelect(e, i));
+      div.addEventListener("pointerenter", (e)=>continueSelect(e, i));
+
+      wheel.appendChild(div);
+    });
+
+    wheel.addEventListener("pointermove", onPointerMove);
+    window.addEventListener("pointerup", endSelect);
+
+    updateSwipePath();
+  }
+
+  let isSelecting = false;
+  let lastPointer = {x:0,y:0};
+
+  function startSelect(e, idx){
+    e.preventDefault();
+    isSelecting = true;
+    selectedIndices = [];
+    currentWord = "";
+    markSelected(idx);
+    lastPointer = getLocalPoint(e);
+    updateCurrentWord();
+  }
+  function continueSelect(e, idx){
+    if(!isSelecting) return;
+    if(e.buttons === 0) return;
+    markSelected(idx);
+    lastPointer = getLocalPoint(e);
+    updateCurrentWord();
+  }
+  function onPointerMove(e){
+    if(!isSelecting) return;
+    lastPointer = getLocalPoint(e);
+    updateSwipePath(true);
+  }
+  function endSelect(){
+    if(!isSelecting) return;
+    isSelecting = false;
+    updateSwipePath(false);
+  }
+
+  function markSelected(idx){
+    if(selectedIndices.includes(idx)) return;
+    selectedIndices.push(idx);
+    currentWord += wheelLetters[idx];
+
+    document.querySelectorAll(".letter").forEach(el=>{
+      const i = parseInt(el.dataset.index,10);
+      el.classList.toggle("selected", selectedIndices.includes(i));
+    });
+    updateSwipePath(true);
+  }
+
+  function resetSelection(){
+    selectedIndices = [];
+    currentWord = "";
+    document.querySelectorAll(".letter").forEach(el=>el.classList.remove("selected"));
+    const p = document.getElementById("swipePath");
+    if(p) p.setAttribute("d","");
+    updateCurrentWord();
+  }
+
+  function getLocalPoint(e){
+    const rect = $("wheel").getBoundingClientRect();
+    const x = (e.clientX - rect.left) * (280 / rect.width);
+    const y = (e.clientY - rect.top)  * (280 / rect.height);
+    return {x,y};
+  }
+  function getLetterCenter(idx){
+    const el = document.querySelector(`.letter[data-index="${idx}"]`);
+    if(!el) return {x:140,y:140};
+    const wheelRect = $("wheel").getBoundingClientRect();
+    const r = el.getBoundingClientRect();
+    const cx = ( (r.left + r.width/2) - wheelRect.left ) * (280 / wheelRect.width);
+    const cy = ( (r.top  + r.height/2) - wheelRect.top )  * (280 / wheelRect.height);
+    return {x:cx, y:cy};
+  }
+  function updateSwipePath(withPointer=false){
+    const p = document.getElementById("swipePath");
+    if(!p) return;
+
+    const pts = selectedIndices.map(getLetterCenter);
+    if(withPointer && isSelecting && pts.length>0){
+      pts.push(lastPointer);
+    }
+    if(pts.length<2){
+      p.setAttribute("d","");
+      return;
+    }
+    let d = `M ${pts[0].x.toFixed(2)} ${pts[0].y.toFixed(2)}`;
+    for(let i=1;i<pts.length;i++){
+      d += ` L ${pts[i].x.toFixed(2)} ${pts[i].y.toFixed(2)}`;
+    }
+    p.setAttribute("d", d);
+  }
+
+  function updateCurrentWord(){
+    $("currentWord").textContent = currentWord || " ";
+  }
+
+  function openMCQ(round){
+    $("mcqModal").style.display = "block";
+    $("mcqBadge").textContent = `MCQ for word: ${round.word}`;
+    $("mcqQuestion").textContent = round.mcq.q;
+    $("mcqMsg").textContent = "Correct answer is required to validate the word (retry allowed).";
+
+    const opts = $("mcqOptions");
+    opts.innerHTML = "";
+
+    const optionItems = round.mcq.options.map((t,i)=>({t,i}));
+    const rendered = SHUFFLE_MCQ_OPTIONS ? shuffle(optionItems) : optionItems;
+
+    opts.dataset.correct = String(rendered.findIndex(x => x.i === round.mcq.answerIndex));
+
+    rendered.forEach((o, idx)=>{
+      const div = document.createElement("label");
+      div.className = "opt";
+      div.innerHTML = `
+        <input type="radio" name="mcq" value="${idx}">
+        <div><b>${String.fromCharCode(65+idx)}.</b> ${o.t}</div>
+      `;
+      opts.appendChild(div);
+    });
+  }
+  function closeMCQ(){ $("mcqModal").style.display = "none"; }
+
+  function setRound(i){
+    currentRoundIndex = i;
+    const round = rounds[currentRoundIndex];
+
+    $("decisionHint").textContent = `Theme: ${round.theme}`;
+    $("hintText").innerHTML = `<b>Hint:</b> ${round.hint}`;
+    $("progressText").textContent = `${validated.size} / ${rounds.length}`;
+
+    placement = choosePlacement(round.word);
+    applyPlacement(round.word, placement);
+
+    const rowLabel = placement.r0 + 1;
+    const colLabel = String.fromCharCode(65 + placement.c0);
+    const pattern = `${placement.dir}-${rowLabel}${colLabel}`;
+    $("patternText").textContent = `Pattern: ${pattern}`;
+
+    wheelLetters = buildWheelLetters(round.word);
+    renderWheel();
+
+    renderWordList();
+    resetSelection();
+  }
+
+  function addToken(){
+    const t = document.createElement("div");
+    t.className = "token";
+    $("tokenRow").appendChild(t);
+    $("tokenCount").textContent = String(validated.size);
+  }
+
+  function checkCompletion(){
+    $("progressText").textContent = `${validated.size} / ${rounds.length}`;
+    if(validated.size === rounds.length){
+      setTimeout(()=> alert("Level Complete! All security words validated."), 80);
+    }
+  }
+
+  $("submitBtn").addEventListener("click", ()=>{
+    const round = rounds[currentRoundIndex];
+    if(currentWord !== round.word){
+      alert("Not matched. Use the hint and try again.");
+      return;
+    }
+    if(validated.has(round.word)){
+      alert("Already validated.");
+      return;
+    }
+    openMCQ(round);
   });
-}
-function closeMCQ(){ $("mcqModal").style.display = "none"; }
 
-/* =======================
-   ROUND FLOW  (PATTERN FIX IS HERE)
-======================= */
-function setRound(i){
-  currentRoundIndex = i;
-  const round = rounds[currentRoundIndex];
+  $("resetBtn").addEventListener("click", resetSelection);
 
-  // top info
-  $("decisionHint").textContent = `Theme: ${round.theme}`;
-  $("hintText").innerHTML = `<b>Hint:</b> ${round.hint}`;
-  $("progressText").textContent = `${validated.size} / ${rounds.length}`;
+  $("shuffleBtn").addEventListener("click", ()=>{
+    wheelLetters = shuffle(wheelLetters);
+    renderWheel();
+    resetSelection();
+  });
 
-  // ✅ placement first
-  placement = choosePlacement(round.word);
-  applyPlacement(round.word, placement);
+  $("mcqReset").addEventListener("click", ()=>{
+    document.querySelectorAll('input[name="mcq"]').forEach(r=>r.checked=false);
+    $("mcqMsg").textContent = "Selection cleared.";
+  });
 
-  // ✅ pattern text after placement exists (FIX)
-  const rowLabel = placement.r0 + 1;
-  const colLabel = String.fromCharCode(65 + placement.c0);
-  const pattern = `${placement.dir}-${rowLabel}${colLabel}`;
-  $("patternText").textContent = `Pattern: ${pattern}`;
+  $("mcqSubmit").addEventListener("click", ()=>{
+    const sel = document.querySelector('input[name="mcq"]:checked');
+    if(!sel){
+      $("mcqMsg").textContent = "Please select an option.";
+      return;
+    }
+    const correct = parseInt($("mcqOptions").dataset.correct,10);
+    const picked = parseInt(sel.value,10);
 
-  // new wheel letters each round
-  wheelLetters = buildWheelLetters(round.word);
-  renderWheel();
+    if(picked !== correct){
+      $("mcqMsg").textContent = "Incorrect. Try again (no penalty).";
+      return;
+    }
 
-  // refresh list panel + word box
-  renderWordList();
-  resetSelection();
-}
+    const round = rounds[currentRoundIndex];
+    validated.add(round.word);
 
-function addToken(){
-  const t = document.createElement("div");
-  t.className = "token";
-  $("tokenRow").appendChild(t);
-  $("tokenCount").textContent = String(validated.size);
-}
-function checkCompletion(){
-  $("progressText").textContent = `${validated.size} / ${rounds.length}`;
-  if(validated.size === rounds.length){
-    setTimeout(()=> alert("Level Complete! All security words validated."), 80);
-  }
-}
+    revealWordOnGrid();
+    addToken();
+    closeMCQ();
+    resetSelection();
 
-/* =======================
-   ACTIONS
-======================= */
-$("submitBtn").addEventListener("click", ()=>{
-  const round = rounds[currentRoundIndex];
-  const attempt = currentWord;
+    renderWordList();
 
-  if(attempt !== round.word){
-    alert("Not matched. Use the hint and try again.");
-    return;
-  }
-  if(validated.has(round.word)){
-    alert("Already validated.");
-    return;
-  }
-  openMCQ(round);
-});
+    const next = currentRoundIndex + 1;
+    if(next < rounds.length){
+      setRound(next);
+    }
+    checkCompletion();
+  });
 
-$("resetBtn").addEventListener("click", resetSelection);
-
-$("shuffleBtn").addEventListener("click", ()=>{
-  wheelLetters = shuffle(wheelLetters);
-  renderWheel();
-  resetSelection();
-});
-
-$("mcqReset").addEventListener("click", ()=>{
-  document.querySelectorAll('input[name="mcq"]').forEach(r=>r.checked=false);
-  $("mcqMsg").textContent = "Selection cleared.";
-});
-
-$("mcqSubmit").addEventListener("click", ()=>{
-  const sel = document.querySelector('input[name="mcq"]:checked');
-  if(!sel){
-    $("mcqMsg").textContent = "Please select an option.";
-    return;
-  }
-  const correct = parseInt($("mcqOptions").dataset.correct,10);
-  const picked = parseInt(sel.value,10);
-
-  if(picked !== correct){
-    $("mcqMsg").textContent = "Incorrect. Try again (no penalty).";
-    return;
-  }
-
-  const round = rounds[currentRoundIndex];
-  validated.add(round.word);
-
-  revealWordOnGrid();
-  addToken();
-  closeMCQ();
-  resetSelection();
-
-  renderWordList();
-
-  const next = currentRoundIndex + 1;
-  if(next < rounds.length){
-    setRound(next);
-  }
-  checkCompletion();
-});
-
-/* =======================
-   INIT
-======================= */
-(function init(){
-  $("progressText").textContent = `0 / ${rounds.length}`;
-  renderWordList();
-  setRound(0);
-})();
+  (function init(){
+    $("progressText").textContent = `0 / ${rounds.length}`;
+    renderWordList();
+    setRound(0);
+  })();
 </script>
 </body>
 </html>
