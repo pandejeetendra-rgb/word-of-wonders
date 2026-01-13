@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Word of Wonders – GBL</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<style>
+body {
+    font-family: Arial, sans-serif;
+    background: #f4f6f8;
+    margin: 0;
+    padding: 0;
+    text-align: center;
+}
+
+h1 {
+    background: #2c3e50;
+    color: white;
+    padding: 12px;
+    margin: 0;
+}
+
+#gameArea {
+    max-width: 420px;
+    margin: 20px auto;
+    background: white;
+    padding: 15px;
+    border-radius: 10px;
+}
+
+#currentWord {
+    font-size: 22px;
+    margin: 10px 0;
+    min-height: 30px;
+}
+
+.letters {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+}
+
+.letter {
+    width: 50px;
+    height: 50px;
+    margin: 6px;
+    background: #3498db;
+    color: white;
+    font-size: 20px;
+    line-height: 50px;
+    border-radius: 50%;
+    cursor: pointer;
+    user-select: none;
+}
+
+.letter.used {
+    background: #95a5a6;
+    pointer-events: none;
+}
+
+button {
+    padding: 8px 14px;
+    margin: 6px;
+    font-size: 14px;
+    cursor: pointer;
+}
+
+#tokens {
+    margin-top: 15px;
+}
+
+.token {
+    display: inline-block;
+    width: 20px;
+    height: 20px;
+    background: #27ae60;
+    border-radius: 50%;
+    margin: 3px;
+}
+
+/* MCQ Modal */
+#mcqModal {
+    display: none;
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    background: rgba(0,0,0,0.6);
+}
+
+#mcqBox {
+    background: white;
+    max-width: 400px;
+    margin: 80px auto;
+    padding: 15px;
+    border-radius: 8px;
+    text-align: left;
+}
+
+.mcq-option {
+    margin: 6px 0;
+}
+</style>
+</head>
+
+<body>
+
+<h1>Word of Wonders</h1>
+
+<div id="gameArea">
+    <p><strong>Find the correct words</strong></p>
+
+    <div id="currentWord"></div>
+
+    <div class="letters" id="letters"></div>
+
+    <button onclick="submitWord()">Submit Word</button>
+    <button onclick="resetWord()">Reset</button>
+
+    <div id="tokens"></div>
+</div>
+
+<!-- MCQ Modal -->
+<div id="mcqModal">
+    <div id="mcqBox">
+        <p id="mcqQuestion"></p>
+        <div id="mcqOptions"></div>
+        <button onclick="submitMCQ()">Submit Answer</button>
+    </div>
+</div>
+
+<script>
+// ---------- GAME DATA ----------
+const targetWords = ["SAFE", "BROWSER"];
+let foundWords = [];
+
+const letters = ["S","A","F","E","B","R","O","W","S","E","R"];
+
+const mcqBank = {
+    SAFE: {
+        q: "Which practice improves browser safety?",
+        options: ["Ignoring updates", "Using strong passwords", "Sharing credentials", "Disabling security"],
+        answer: 1
+    },
+    BROWSER: {
+        q: "A secure browser should have which feature?",
+        options: ["Auto malware download", "Frequent crashes", "Security updates", "No privacy settings"],
+        answer: 2
+    }
+};
+
+let currentWord = "";
+let activeWord = "";
+
+// ---------- INIT ----------
+const lettersDiv = document.getElementById("letters");
+letters.forEach((l, i) => {
+    const div = document.createElement("div");
+    div.className = "letter";
+    div.innerText = l;
+    div.onclick = () => selectLetter(div, l);
+    lettersDiv.appendChild(div);
+});
+
+// ---------- FUNCTIONS ----------
+function selectLetter(div, letter) {
+    currentWord += letter;
+    div.classList.add("used");
+    updateWord();
+}
+
+function updateWord() {
+    document.getElementById("currentWord").innerText = currentWord;
+}
+
+function resetWord() {
+    currentWord = "";
+    document.querySelectorAll(".letter").forEach(l => l.classList.remove("used"));
+    updateWord();
+}
+
+function submitWord() {
+    if (targetWords.includes(currentWord) && !foundWords.includes(currentWord)) {
+        activeWord = currentWord;
+        showMCQ(currentWord);
+    } else {
+        alert("Incorrect or already used word");
+        resetWord();
+    }
+}
+
+function showMCQ(word) {
+    const mcq = mcqBank[word];
+    document.getElementById("mcqQuestion").innerText = mcq.q;
+    const optionsDiv = document.getElementById("mcqOptions");
+    optionsDiv.innerHTML = "";
+    mcq.options.forEach((opt, idx) => {
+        optionsDiv.innerHTML += `
+            <div class="mcq-option">
+                <input type="radio" name="mcq" value="${idx}"> ${opt}
+            </div>`;
+    });
+    document.getElementById("mcqModal").style.display = "block";
+}
+
+function submitMCQ() {
+    const selected = document.querySelector('input[name="mcq"]:checked');
+    if (!selected) {
+        alert("Please select an option");
+        return;
+    }
+    const correct = mcqBank[activeWord].answer;
+    if (parseInt(selected.value) === correct) {
+        foundWords.push(activeWord);
+        addToken();
+        closeMCQ();
+        resetWord();
+        checkCompletion();
+    } else {
+        alert("Incorrect answer. Try again.");
+    }
+}
+
+function closeMCQ() {
+    document.getElementById("mcqModal").style.display = "none";
+}
+
+function addToken() {
+    const t = document.createElement("div");
+    t.className = "token";
+    document.getElementById("tokens").appendChild(t);
+}
+
+function checkCompletion() {
+    if (foundWords.length === targetWords.length) {
+        alert("Level Complete! All words validated.");
+    }
+}
+</script>
+
+</body>
+</html>
