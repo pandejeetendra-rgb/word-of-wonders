@@ -15,7 +15,6 @@
       --shadow2: 0 6px 16px rgba(0,0,0,.12);
       --radius: 18px;
     }
-
     *{box-sizing:border-box}
     body{
       margin:0;
@@ -30,7 +29,6 @@
       justify-content:center;
       padding:18px 12px 28px;
     }
-
     .wrap{ width:min(520px, 96vw); }
 
     header{
@@ -40,7 +38,6 @@
       gap:10px;
       margin:6px 4px 12px;
     }
-
     .title{
       display:flex;
       flex-direction:column;
@@ -48,7 +45,7 @@
       color:white;
       text-align:left;
     }
-    .title h1{ margin:0; font-size:18px; font-weight:800; }
+    .title h1{ margin:0; font-size:18px; font-weight:800; letter-spacing:.2px; }
     .title small{ opacity:.9; font-size:12px; }
 
     .pill{
@@ -90,37 +87,56 @@
     .sectionTitle .left span{ font-size:12px; color:var(--muted); }
     .progress{ font-size:12px; color:var(--muted); white-space:nowrap; }
 
-    /* Word list panel */
-    .wordList{
+    /* ✅ Clue board (no answer-revealing chips) */
+    .clueBoard{
       display:flex;
-      flex-wrap:wrap;
+      flex-direction:column;
       gap:8px;
       margin: 8px 0 12px;
-      padding:10px;
+      padding:12px;
       background: rgba(255,255,255,.55);
       border:1px solid rgba(255,255,255,.65);
       border-radius: 16px;
       box-shadow: var(--shadow2);
-      justify-content:center;
     }
-    .chip{
-      padding:6px 10px;
-      border-radius: 999px;
-      font-size:12px;
-      font-weight:800;
-      border:1px solid rgba(0,0,0,.08);
+    .clueItem{
+      display:flex;
+      gap:10px;
+      align-items:flex-start;
+      padding:10px;
+      border-radius: 14px;
       background: rgba(255,255,255,.85);
+      border:1px solid rgba(0,0,0,.06);
+    }
+    .clueNo{
+      width:28px;
+      height:28px;
+      border-radius: 10px;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      font-weight:900;
+      font-size:12px;
+      color:#0f172a;
+      background: rgba(59,130,246,.12);
+      border: 1px solid rgba(59,130,246,.20);
+      flex:0 0 auto;
+    }
+    .clueText{
+      font-size:12px;
+      line-height:1.35;
       color:#334155;
-      user-select:none;
     }
-    .chip.done{
-      background: rgba(34,197,94,.15);
-      border-color: rgba(34,197,94,.35);
-      color:#166534;
+    .clueItem.done{
+      background: rgba(34,197,94,.10);
+      border-color: rgba(34,197,94,.25);
     }
-    .chip.current{ outline: 2px solid rgba(59,130,246,.55); }
+    .clueItem.done .clueNo{
+      background: rgba(34,197,94,.16);
+      border-color: rgba(34,197,94,.28);
+    }
 
-    /* ✅ Crossword grid now 10×10 */
+    /* ✅ Crossword grid 10×10 (supports long words) */
     .grid{
       display:grid;
       grid-template-columns: repeat(10, 1fr);
@@ -133,32 +149,41 @@
     }
     .cell{
       aspect-ratio: 1 / 1;
-      border-radius: 10px;
-      background: linear-gradient(180deg, #fff, #eef2ff);
+      border-radius: 12px;
+      background: linear-gradient(180deg, #ffffff, #eef2ff);
       display:flex;
       align-items:center;
       justify-content:center;
       font-weight:900;
       font-size:13px;
-      color:#111827;
+      color:#0f172a;
       position:relative;
       user-select:none;
       overflow:hidden;
+      box-shadow:
+        0 8px 14px rgba(15, 23, 42, .08),
+        inset 0 1px 0 rgba(255,255,255,.9);
+      border: 1px solid rgba(148,163,184,.35);
     }
     .cell.blank{
       background: rgba(255,255,255,.25);
       border:1px dashed rgba(255,255,255,.65);
       color:transparent;
+      box-shadow:none;
     }
-    .cell.reveal{ animation: pop .18s ease-out; }
-    @keyframes pop{ from{transform:scale(.96)} to{transform:scale(1)} }
-    .cell.locked::after{
-      content:"";
-      position:absolute;
-      inset:-20px;
-      background: radial-gradient(circle at 30% 30%, rgba(59,130,246,.20), transparent 55%);
-      pointer-events:none;
+    .cell.locked{
+      background:
+        radial-gradient(circle at 30% 25%, rgba(59,130,246,.18), transparent 55%),
+        linear-gradient(180deg, #ffffff, #eef2ff);
     }
+    .cell.reveal{
+      animation: tilePop .18s ease-out;
+      background:
+        radial-gradient(circle at 30% 25%, rgba(34,197,94,.22), transparent 55%),
+        linear-gradient(180deg, #ffffff, #ecfdf5);
+      border-color: rgba(34,197,94,.35);
+    }
+    @keyframes tilePop{ from{transform:scale(.94)} to{transform:scale(1)} }
 
     .currentWord{
       margin:12px 2px 8px;
@@ -219,7 +244,6 @@
       font-size:12px;
       gap:10px;
     }
-
     .wheel{
       width: 280px;
       height: 280px;
@@ -247,9 +271,7 @@
       box-shadow: 0 10px 18px rgba(37,99,235,.25);
       border: 1px solid rgba(255,255,255,.35);
     }
-    .letter.selected{
-      background: linear-gradient(180deg, #22c55e, #16a34a);
-    }
+    .letter.selected{ background: linear-gradient(180deg, #22c55e, #16a34a); }
     .wheel svg{ position:absolute; inset:0; pointer-events:none; }
     .wheel path{
       stroke: rgba(34,197,94,.9);
@@ -301,7 +323,9 @@
       box-shadow: 0 6px 12px rgba(34,197,94,.25);
       border:1px solid rgba(255,255,255,.55);
     }
+    .msg{ margin-top:8px; font-size:12px; color:var(--muted); }
 
+    /* MCQ modal */
     .modal{
       display:none;
       position:fixed;
@@ -337,14 +361,24 @@
     }
     .q{ margin:10px 0 8px; font-weight:800; line-height:1.35; }
     .opt{
-      display:flex; gap:10px; align-items:flex-start;
-      padding:10px; border-radius: 12px; border:1px solid #e5e7eb;
-      margin:8px 0; cursor:pointer;
+      display:flex;
+      gap:10px;
+      align-items:flex-start;
+      padding:10px;
+      border-radius: 12px;
+      border:1px solid #e5e7eb;
+      margin:8px 0;
+      cursor:pointer;
     }
     .opt:hover{background:#f9fafb}
     .opt input{margin-top:3px}
-    .modalActions{ display:flex; gap:10px; justify-content:flex-end; margin-top:10px; flex-wrap:wrap; }
-    .msg{ margin-top:8px; font-size:12px; color:var(--muted); }
+    .modalActions{
+      display:flex;
+      gap:10px;
+      justify-content:flex-end;
+      margin-top:10px;
+      flex-wrap:wrap;
+    }
 
     @media (max-width:380px){
       .wheel{ width: 250px; height: 250px; }
@@ -377,7 +411,8 @@
         <div class="progress" id="progressText">0 / 0</div>
       </div>
 
-      <div class="wordList" id="wordList"></div>
+      <!-- ✅ Clue-only board (no direct answer hints) -->
+      <div class="clueBoard" id="clueBoard"></div>
 
       <div class="grid" id="grid"></div>
 
@@ -386,7 +421,7 @@
         <div class="decision" id="decisionHint">Theme: —</div>
       </div>
 
-      <div class="hintLine" id="hintText"><b>Hint:</b> —</div>
+      <div class="hintLine" id="hintText"><b>Hint (current):</b> —</div>
 
       <div class="wheelWrap">
         <div class="wheelHeader">
@@ -416,6 +451,7 @@
       </div>
     </div>
 
+    <!-- MCQ modal -->
     <div class="modal" id="mcqModal">
       <div class="modalBox">
         <div class="modalTop">
@@ -438,9 +474,10 @@
   /* SETTINGS */
   const ROWS = 10;
   const COLS = 10;
-  const EXTRA_LETTERS = 2;
+  const EXTRA_LETTERS = 2;         // keep low cognitive load
   const SHUFFLE_MCQ_OPTIONS = true;
 
+  /* ROUNDS (browser security words) */
   const rounds = [
     { word:"SECURITY", theme:"Browser Protection", hint:"A browser must protect users from online threats.",
       mcq:{ q:"Which is the best meaning of browser security?",
@@ -503,6 +540,7 @@
   let placement = null;
   let gridState = makeEmptyGrid();
 
+  /* DOM */
   const $ = (id) => document.getElementById(id);
 
   function shuffle(arr){
@@ -515,19 +553,23 @@
   }
   function randInt(min,max){ return Math.floor(Math.random()*(max-min+1))+min; }
 
-  function renderWordList(){
-    const el = $("wordList");
+  /* ✅ clue-only board */
+  function renderClueBoard(){
+    const el = $("clueBoard");
     el.innerHTML = "";
+
     rounds.forEach((r, idx)=>{
-      const chip = document.createElement("div");
-      chip.className = "chip";
-      if(validated.has(r.word)) chip.classList.add("done");
-      if(idx === currentRoundIndex) chip.classList.add("current");
-      chip.textContent = r.word;
-      el.appendChild(chip);
+      const item = document.createElement("div");
+      item.className = "clueItem" + (validated.has(r.word) ? " done" : "");
+      item.innerHTML = `
+        <div class="clueNo">${idx+1}</div>
+        <div class="clueText"><b>Clue:</b> ${r.hint}</div>
+      `;
+      el.appendChild(item);
     });
   }
 
+  /* GRID */
   function makeEmptyGrid(){
     const grid = [];
     for(let r=0;r<ROWS;r++){
@@ -541,7 +583,6 @@
   }
 
   function choosePlacement(word){
-    // now always fits because COLS/ROWS = 10, max word length = 9
     const dir = Math.random() < 0.5 ? "H" : "V";
     if(dir === "H"){
       const r0 = randInt(0, ROWS-1);
@@ -590,14 +631,46 @@
     renderGrid();
   }
 
+  /* ✅ SAFE WHEEL LETTER GENERATION
+     Rule: no consecutive letters of the target word are adjacent on the wheel (circular adjacency)
+  */
   function buildWheelLetters(word){
     const base = word.split("");
     const alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("");
+
     const extras = [];
     for(let i=0;i<EXTRA_LETTERS;i++){
       extras.push(alphabet[randInt(0, alphabet.length-1)]);
     }
-    return shuffle(base.concat(extras));
+
+    const letters = base.concat(extras);
+
+    // forbidden adjacency pairs: (word[i], word[i+1]) and reverse
+    const forbidden = new Set();
+    for(let i=0;i<word.length-1;i++){
+      const a = word[i], b = word[i+1];
+      forbidden.add(a + "|" + b);
+      forbidden.add(b + "|" + a);
+    }
+
+    // try many shuffles to satisfy constraint
+    for(let attempt=0; attempt<2500; attempt++){
+      const candidate = shuffle(letters);
+      let ok = true;
+
+      for(let i=0;i<candidate.length;i++){
+        const a = candidate[i];
+        const b = candidate[(i+1) % candidate.length]; // circular neighbor
+        if(forbidden.has(a + "|" + b)){
+          ok = false;
+          break;
+        }
+      }
+      if(ok) return candidate;
+    }
+
+    // fallback (rare)
+    return shuffle(letters);
   }
 
   function renderWheel(){
@@ -654,6 +727,7 @@
     lastPointer = getLocalPoint(e);
     updateCurrentWord();
   }
+
   function continueSelect(e, idx){
     if(!isSelecting) return;
     if(e.buttons === 0) return;
@@ -661,11 +735,13 @@
     lastPointer = getLocalPoint(e);
     updateCurrentWord();
   }
+
   function onPointerMove(e){
     if(!isSelecting) return;
     lastPointer = getLocalPoint(e);
     updateSwipePath(true);
   }
+
   function endSelect(){
     if(!isSelecting) return;
     isSelecting = false;
@@ -699,6 +775,7 @@
     const y = (e.clientY - rect.top)  * (280 / rect.height);
     return {x,y};
   }
+
   function getLetterCenter(idx){
     const el = document.querySelector(`.letter[data-index="${idx}"]`);
     if(!el) return {x:140,y:140};
@@ -708,6 +785,7 @@
     const cy = ( (r.top  + r.height/2) - wheelRect.top )  * (280 / wheelRect.height);
     return {x:cx, y:cy};
   }
+
   function updateSwipePath(withPointer=false){
     const p = document.getElementById("swipePath");
     if(!p) return;
@@ -731,11 +809,12 @@
     $("currentWord").textContent = currentWord || " ";
   }
 
+  /* MCQ */
   function openMCQ(round){
     $("mcqModal").style.display = "block";
-    $("mcqBadge").textContent = `MCQ for word: ${round.word}`;
+    $("mcqBadge").textContent = `MCQ check (word found)`;
     $("mcqQuestion").textContent = round.mcq.q;
-    $("mcqMsg").textContent = "Correct answer is required to validate the word (retry allowed).";
+    $("mcqMsg").textContent = "Correct answer is required to validate. Retry allowed.";
 
     const opts = $("mcqOptions");
     opts.innerHTML = "";
@@ -757,12 +836,43 @@
   }
   function closeMCQ(){ $("mcqModal").style.display = "none"; }
 
+  /* small celebration (optional but nice) */
+  function burst(){
+    const b = document.createElement("div");
+    b.style.position="fixed";
+    b.style.left="50%";
+    b.style.top="45%";
+    b.style.width="12px";
+    b.style.height="12px";
+    b.style.borderRadius="50%";
+    b.style.transform="translate(-50%,-50%)";
+    b.style.pointerEvents="none";
+    b.style.boxShadow = `
+      0 -30px 0 rgba(34,197,94,.9),
+      0  30px 0 rgba(34,197,94,.7),
+      30px 0 0 rgba(59,130,246,.85),
+      -30px 0 0 rgba(59,130,246,.75),
+      22px -22px 0 rgba(168,85,247,.8),
+      -22px 22px 0 rgba(168,85,247,.7),
+      -22px -22px 0 rgba(251,191,36,.85),
+      22px 22px 0 rgba(251,191,36,.75)
+    `;
+    document.body.appendChild(b);
+    b.animate(
+      [{transform:"translate(-50%,-50%) scale(.8)", opacity:1},
+       {transform:"translate(-50%,-60%) scale(1.4)", opacity:0}],
+      {duration:520, easing:"cubic-bezier(.2,.9,.2,1)"}
+    );
+    setTimeout(()=>b.remove(), 600);
+  }
+
+  /* ROUND FLOW */
   function setRound(i){
     currentRoundIndex = i;
     const round = rounds[currentRoundIndex];
 
     $("decisionHint").textContent = `Theme: ${round.theme}`;
-    $("hintText").innerHTML = `<b>Hint:</b> ${round.hint}`;
+    $("hintText").innerHTML = `<b>Hint (current):</b> ${round.hint}`;
     $("progressText").textContent = `${validated.size} / ${rounds.length}`;
 
     placement = choosePlacement(round.word);
@@ -770,13 +880,12 @@
 
     const rowLabel = placement.r0 + 1;
     const colLabel = String.fromCharCode(65 + placement.c0);
-    const pattern = `${placement.dir}-${rowLabel}${colLabel}`;
-    $("patternText").textContent = `Pattern: ${pattern}`;
+    $("patternText").textContent = `Pattern: ${placement.dir}-${rowLabel}${colLabel}`;
 
     wheelLetters = buildWheelLetters(round.word);
     renderWheel();
 
-    renderWordList();
+    renderClueBoard();
     resetSelection();
   }
 
@@ -789,15 +898,18 @@
 
   function checkCompletion(){
     $("progressText").textContent = `${validated.size} / ${rounds.length}`;
+    renderClueBoard();
     if(validated.size === rounds.length){
-      setTimeout(()=> alert("Level Complete! All security words validated."), 80);
+      setTimeout(()=> alert("Level Complete! All clues validated."), 80);
     }
   }
 
+  /* ACTIONS */
   $("submitBtn").addEventListener("click", ()=>{
     const round = rounds[currentRoundIndex];
+
     if(currentWord !== round.word){
-      alert("Not matched. Use the hint and try again.");
+      alert("Not matched. Use the sentence clue and try again.");
       return;
     }
     if(validated.has(round.word)){
@@ -810,7 +922,9 @@
   $("resetBtn").addEventListener("click", resetSelection);
 
   $("shuffleBtn").addEventListener("click", ()=>{
-    wheelLetters = shuffle(wheelLetters);
+    // keep shuffle but still protect adjacency: rebuild safe wheel again
+    const round = rounds[currentRoundIndex];
+    wheelLetters = buildWheelLetters(round.word);
     renderWheel();
     resetSelection();
   });
@@ -839,10 +953,9 @@
 
     revealWordOnGrid();
     addToken();
+    burst();
     closeMCQ();
     resetSelection();
-
-    renderWordList();
 
     const next = currentRoundIndex + 1;
     if(next < rounds.length){
@@ -851,9 +964,10 @@
     checkCompletion();
   });
 
+  /* INIT */
   (function init(){
     $("progressText").textContent = `0 / ${rounds.length}`;
-    renderWordList();
+    renderClueBoard();
     setRound(0);
   })();
 </script>
