@@ -87,7 +87,7 @@
     .sectionTitle .left span{ font-size:12px; color:var(--muted); }
     .progress{ font-size:12px; color:var(--muted); white-space:nowrap; }
 
-    /* ✅ Clue board (no answer-revealing chips) */
+    /* ✅ Current clue (only one at a time) */
     .clueBoard{
       display:flex;
       flex-direction:column;
@@ -127,16 +127,8 @@
       line-height:1.35;
       color:#334155;
     }
-    .clueItem.done{
-      background: rgba(34,197,94,.10);
-      border-color: rgba(34,197,94,.25);
-    }
-    .clueItem.done .clueNo{
-      background: rgba(34,197,94,.16);
-      border-color: rgba(34,197,94,.28);
-    }
 
-    /* ✅ Crossword grid 10×10 (supports long words) */
+    /* ✅ Crossword grid 10×10 */
     .grid{
       display:grid;
       grid-template-columns: repeat(10, 1fr);
@@ -411,8 +403,13 @@
         <div class="progress" id="progressText">0 / 0</div>
       </div>
 
-      <!-- ✅ Clue-only board (no direct answer hints) -->
-      <div class="clueBoard" id="clueBoard"></div>
+      <!-- ✅ only current clue shown -->
+      <div class="clueBoard">
+        <div class="clueItem" id="currentClueItem">
+          <div class="clueNo" id="clueNo">1</div>
+          <div class="clueText" id="currentClueText"><b>Clue:</b> —</div>
+        </div>
+      </div>
 
       <div class="grid" id="grid"></div>
 
@@ -421,7 +418,7 @@
         <div class="decision" id="decisionHint">Theme: —</div>
       </div>
 
-      <div class="hintLine" id="hintText"><b>Hint (current):</b> —</div>
+      <div class="hintLine" id="hintText"><b>Status:</b> Use the clue to build the word, then answer the MCQ.</div>
 
       <div class="wheelWrap">
         <div class="wheelHeader">
@@ -474,56 +471,56 @@
   /* SETTINGS */
   const ROWS = 10;
   const COLS = 10;
-  const EXTRA_LETTERS = 2;         // keep low cognitive load
+  const EXTRA_LETTERS = 2;
   const SHUFFLE_MCQ_OPTIONS = true;
 
-  /* ROUNDS (browser security words) */
+  /* ROUNDS */
   const rounds = [
-    { word:"SECURITY", theme:"Browser Protection", hint:"A browser must protect users from online threats.",
+    { word:"SECURITY", theme:"Browser Protection", clue:"A browser must protect users from online threats.",
       mcq:{ q:"Which is the best meaning of browser security?",
         options:["Making the browser look attractive","Protecting users from threats and unsafe websites","Increasing screen brightness","Reducing monitor size"],
         answerIndex:1 } },
-    { word:"PRIVACY", theme:"Data Protection", hint:"Browsers differ in how they handle user data.",
+    { word:"PRIVACY", theme:"Data Protection", clue:"Browsers differ in how they handle user data.",
       mcq:{ q:"What does browser privacy mainly focus on?",
         options:["Preventing collection and misuse of user data","Improving speaker volume","Increasing download speed only","Changing wallpaper automatically"],
         answerIndex:0 } },
-    { word:"UPDATES", theme:"Vulnerability Fixes", hint:"Regular fixes help close known vulnerabilities.",
+    { word:"UPDATES", theme:"Vulnerability Fixes", clue:"Regular fixes help close known vulnerabilities.",
       mcq:{ q:"Why are regular browser updates important?",
         options:["They add random pop-ups","They remove the keyboard","They fix security issues and bugs","They disable encryption"],
         answerIndex:2 } },
-    { word:"MALWARE", theme:"Threat Awareness", hint:"Some software is designed to harm systems or steal data.",
+    { word:"MALWARE", theme:"Threat Awareness", clue:"Some software is designed to harm systems or steal data.",
       mcq:{ q:"Malware is best described as:",
         options:["A helpful system tool","A security patch","A type of internet cable","Software intended to harm or steal information"],
         answerIndex:3 } },
-    { word:"HTTPS", theme:"Secure Connection", hint:"Secure communication protects data during transmission.",
+    { word:"HTTPS", theme:"Secure Connection", clue:"Secure communication protects data during transmission.",
       mcq:{ q:"HTTPS is important because it:",
         options:["Helps secure data exchanged between browser and website","Makes the website offline","Blocks all cookies automatically","Turns off the network card"],
         answerIndex:0 } },
-    { word:"ENCRYPT", theme:"Confidentiality", hint:"Sensitive data should not be readable in plain form.",
+    { word:"ENCRYPT", theme:"Confidentiality", clue:"Sensitive data should not be readable in plain form.",
       mcq:{ q:"Encryption means:",
         options:["Deleting data permanently","Converting data into unreadable form without a key","Increasing screen resolution","Adding more bookmarks"],
         answerIndex:1 } },
-    { word:"SANDBOX", theme:"Isolation", hint:"Isolation helps prevent malicious code from spreading.",
+    { word:"SANDBOX", theme:"Isolation", clue:"Isolation helps prevent malicious code from spreading.",
       mcq:{ q:"Sandboxing in a browser helps by:",
         options:["Running content in isolation to limit damage","Saving passwords in plain text","Allowing all extensions without checks","Disabling updates permanently"],
         answerIndex:0 } },
-    { word:"CERT", theme:"Trust & Certificates", hint:"Websites use digital proof to establish trust.",
+    { word:"CERT", theme:"Trust & Certificates", clue:"Websites use digital proof to establish trust.",
       mcq:{ q:"A digital certificate is mainly used to:",
         options:["Increase the size of images","Prove a website’s identity and enable secure connection","Add more advertisements","Disable HTTPS"],
         answerIndex:1 } },
-    { word:"PASSWORD", theme:"Account Safety", hint:"Weak credentials make accounts vulnerable.",
+    { word:"PASSWORD", theme:"Account Safety", clue:"Weak credentials make accounts vulnerable.",
       mcq:{ q:"Which password practice is the safest?",
         options:["Using the same password everywhere","Using short passwords like 12345","Using strong, unique passwords for important accounts","Sharing passwords with friends"],
         answerIndex:2 } },
-    { word:"COOKIES", theme:"Tracking Controls", hint:"Small files can track user activity across websites.",
+    { word:"COOKIES", theme:"Tracking Controls", clue:"Small files can track user activity across websites.",
       mcq:{ q:"Cookies are primarily used to:",
         options:["Store small pieces of data like session and preferences","Repair a hard disk","Encrypt all web traffic automatically","Turn off the browser"],
         answerIndex:0 } },
-    { word:"TRACKING", theme:"Online Behaviour", hint:"Some websites follow user behaviour online.",
+    { word:"TRACKING", theme:"Online Behaviour", clue:"Some websites follow user behaviour online.",
       mcq:{ q:"Online tracking generally refers to:",
         options:["Monitoring user activity for ads/analytics across sites","Cleaning the computer screen","Increasing browser window size","Storing files only on USB drive"],
         answerIndex:0 } },
-    { word:"EXTENSION", theme:"Add-ons Risk", hint:"Add-ons can improve features but may introduce risks.",
+    { word:"EXTENSION", theme:"Add-ons Risk", clue:"Add-ons can improve features but may introduce risks.",
       mcq:{ q:"Which is a security risk with browser extensions?",
         options:["They always improve privacy","They can request excessive permissions and misuse data","They automatically remove malware","They replace HTTPS with HTTP"],
         answerIndex:1 } },
@@ -540,7 +537,6 @@
   let placement = null;
   let gridState = makeEmptyGrid();
 
-  /* DOM */
   const $ = (id) => document.getElementById(id);
 
   function shuffle(arr){
@@ -552,22 +548,6 @@
     return a;
   }
   function randInt(min,max){ return Math.floor(Math.random()*(max-min+1))+min; }
-
-  /* ✅ clue-only board */
-  function renderClueBoard(){
-    const el = $("clueBoard");
-    el.innerHTML = "";
-
-    rounds.forEach((r, idx)=>{
-      const item = document.createElement("div");
-      item.className = "clueItem" + (validated.has(r.word) ? " done" : "");
-      item.innerHTML = `
-        <div class="clueNo">${idx+1}</div>
-        <div class="clueText"><b>Clue:</b> ${r.hint}</div>
-      `;
-      el.appendChild(item);
-    });
-  }
 
   /* GRID */
   function makeEmptyGrid(){
@@ -631,9 +611,7 @@
     renderGrid();
   }
 
-  /* ✅ SAFE WHEEL LETTER GENERATION
-     Rule: no consecutive letters of the target word are adjacent on the wheel (circular adjacency)
-  */
+  /* ✅ SAFE WHEEL: no consecutive letters adjacent (circular) */
   function buildWheelLetters(word){
     const base = word.split("");
     const alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("");
@@ -645,7 +623,6 @@
 
     const letters = base.concat(extras);
 
-    // forbidden adjacency pairs: (word[i], word[i+1]) and reverse
     const forbidden = new Set();
     for(let i=0;i<word.length-1;i++){
       const a = word[i], b = word[i+1];
@@ -653,14 +630,12 @@
       forbidden.add(b + "|" + a);
     }
 
-    // try many shuffles to satisfy constraint
     for(let attempt=0; attempt<2500; attempt++){
       const candidate = shuffle(letters);
       let ok = true;
-
       for(let i=0;i<candidate.length;i++){
         const a = candidate[i];
-        const b = candidate[(i+1) % candidate.length]; // circular neighbor
+        const b = candidate[(i+1) % candidate.length];
         if(forbidden.has(a + "|" + b)){
           ok = false;
           break;
@@ -668,8 +643,6 @@
       }
       if(ok) return candidate;
     }
-
-    // fallback (rare)
     return shuffle(letters);
   }
 
@@ -812,7 +785,7 @@
   /* MCQ */
   function openMCQ(round){
     $("mcqModal").style.display = "block";
-    $("mcqBadge").textContent = `MCQ check (word found)`;
+    $("mcqBadge").textContent = `MCQ check`;
     $("mcqQuestion").textContent = round.mcq.q;
     $("mcqMsg").textContent = "Correct answer is required to validate. Retry allowed.";
 
@@ -836,7 +809,6 @@
   }
   function closeMCQ(){ $("mcqModal").style.display = "none"; }
 
-  /* small celebration (optional but nice) */
   function burst(){
     const b = document.createElement("div");
     b.style.position="fixed";
@@ -866,14 +838,18 @@
     setTimeout(()=>b.remove(), 600);
   }
 
-  /* ROUND FLOW */
+  /* ROUND */
   function setRound(i){
     currentRoundIndex = i;
     const round = rounds[currentRoundIndex];
 
     $("decisionHint").textContent = `Theme: ${round.theme}`;
-    $("hintText").innerHTML = `<b>Hint (current):</b> ${round.hint}`;
     $("progressText").textContent = `${validated.size} / ${rounds.length}`;
+
+    $("clueNo").textContent = String(i + 1);
+    $("currentClueText").innerHTML = `<b>Clue:</b> ${round.clue}`;
+
+    $("hintText").innerHTML = `<b>Status:</b> Use the clue, build the word, then answer the MCQ.`;
 
     placement = choosePlacement(round.word);
     applyPlacement(round.word, placement);
@@ -884,8 +860,6 @@
 
     wheelLetters = buildWheelLetters(round.word);
     renderWheel();
-
-    renderClueBoard();
     resetSelection();
   }
 
@@ -898,7 +872,6 @@
 
   function checkCompletion(){
     $("progressText").textContent = `${validated.size} / ${rounds.length}`;
-    renderClueBoard();
     if(validated.size === rounds.length){
       setTimeout(()=> alert("Level Complete! All clues validated."), 80);
     }
@@ -922,7 +895,6 @@
   $("resetBtn").addEventListener("click", resetSelection);
 
   $("shuffleBtn").addEventListener("click", ()=>{
-    // keep shuffle but still protect adjacency: rebuild safe wheel again
     const round = rounds[currentRoundIndex];
     wheelLetters = buildWheelLetters(round.word);
     renderWheel();
@@ -967,7 +939,6 @@
   /* INIT */
   (function init(){
     $("progressText").textContent = `0 / ${rounds.length}`;
-    renderClueBoard();
     setRound(0);
   })();
 </script>
