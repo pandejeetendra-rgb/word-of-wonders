@@ -14,6 +14,10 @@
       --shadow: 0 10px 25px rgba(0,0,0,.15);
       --shadow2: 0 6px 16px rgba(0,0,0,.12);
       --radius: 18px;
+
+      /* ✅ Responsive wheel sizing */
+      --wheelSize: clamp(280px, 72vw, 340px);
+      --letterSize: clamp(54px, 12vw, 66px);
     }
     *{box-sizing:border-box}
     body{
@@ -92,7 +96,7 @@
       display:flex;
       flex-direction:column;
       gap:8px;
-      margin: 8px 0 12px;
+      margin: 8px 0 10px;   /* reduced */
       padding:12px;
       background: rgba(255,255,255,.55);
       border:1px solid rgba(255,255,255,.65);
@@ -128,48 +132,45 @@
       color:#334155;
     }
 
-    /* ✅ Grid auto-crops to active band (removes empty space) */
-    .grid{
-      display:grid;
-      grid-template-columns: repeat(10, 1fr);
-      gap:6px;
-      padding:8px;
+    /* ✅ Word slots (NO 10×10 area, NO extra white space) */
+    .slotsWrap{
       background: rgba(255,255,255,.55);
       border-radius: 16px;
       box-shadow: var(--shadow2);
       border:1px solid rgba(255,255,255,.65);
-      align-content: start; /* important */
+      padding:10px;
+      margin: 0 0 10px; /* tight */
     }
-    .cell{
-      aspect-ratio: 1 / 1;
+    .slots{
+      display:grid;
+      gap:8px;
+      justify-content:center;
+      align-content:center;
+      min-height: 0; /* important: no forced height */
+    }
+    .slot{
+      width: 44px;
+      height: 44px;
       border-radius: 12px;
       background: linear-gradient(180deg, #ffffff, #eef2ff);
       display:flex;
       align-items:center;
       justify-content:center;
       font-weight:900;
-      font-size:13px;
+      font-size:16px;
       color:#0f172a;
-      position:relative;
       user-select:none;
-      overflow:hidden;
       box-shadow:
         0 8px 14px rgba(15, 23, 42, .08),
         inset 0 1px 0 rgba(255,255,255,.9);
       border: 1px solid rgba(148,163,184,.35);
     }
-    .cell.blank{
-      background: rgba(255,255,255,.25);
-      border:1px dashed rgba(255,255,255,.65);
-      color:transparent;
-      box-shadow:none;
-    }
-    .cell.locked{
+    .slot.locked{
       background:
         radial-gradient(circle at 30% 25%, rgba(59,130,246,.18), transparent 55%),
         linear-gradient(180deg, #ffffff, #eef2ff);
     }
-    .cell.reveal{
+    .slot.reveal{
       animation: tilePop .18s ease-out;
       background:
         radial-gradient(circle at 30% 25%, rgba(34,197,94,.22), transparent 55%),
@@ -179,7 +180,7 @@
     @keyframes tilePop{ from{transform:scale(.94)} to{transform:scale(1)} }
 
     .currentWord{
-      margin:12px 2px 8px;
+      margin:10px 2px 8px;
       display:flex;
       align-items:center;
       justify-content:space-between;
@@ -237,28 +238,32 @@
       font-size:12px;
       gap:10px;
     }
+
+    /* ✅ Bigger wheel, responsive */
     .wheel{
-      width: 280px;
-      height: 280px;
+      width: var(--wheelSize);
+      height: var(--wheelSize);
       margin: 0 auto;
       position: relative;
       border-radius: 50%;
       background: radial-gradient(circle at 40% 35%, rgba(255,255,255,.95), rgba(255,255,255,.55));
       border: 1px solid rgba(255,255,255,.8);
-      box-shadow: inset 0 0 0 10px rgba(59,130,246,.08), var(--shadow2);
+      box-shadow: inset 0 0 0 12px rgba(59,130,246,.08), var(--shadow2);
       touch-action: none;
       user-select:none;
     }
+
+    /* ✅ Larger touch targets */
     .letter{
-      width: 54px;
-      height: 54px;
+      width: var(--letterSize);
+      height: var(--letterSize);
       border-radius: 50%;
       position:absolute;
       display:flex;
       align-items:center;
       justify-content:center;
       font-weight:900;
-      font-size:18px;
+      font-size: clamp(18px, 4.6vw, 22px);
       background: linear-gradient(180deg, #3b82f6, #2563eb);
       color:white;
       box-shadow: 0 10px 18px rgba(37,99,235,.25);
@@ -374,11 +379,8 @@
     }
 
     @media (max-width:380px){
-      .wheel{ width: 250px; height: 250px; }
-      .letter{ width:50px; height:50px; font-size:17px; }
-      .grid{ gap:5px; }
-      .cell{ font-size:12px; }
       .decision{ min-width:120px; }
+      .slot{ width:40px; height:40px; font-size:15px; }
     }
   </style>
 </head>
@@ -411,7 +413,10 @@
         </div>
       </div>
 
-      <div class="grid" id="grid"></div>
+      <!-- ✅ replaces big grid with compact slots only -->
+      <div class="slotsWrap">
+        <div class="slots" id="slots"></div>
+      </div>
 
       <div class="currentWord">
         <div class="wordBox" id="currentWord"> </div>
@@ -427,7 +432,7 @@
         </div>
 
         <div class="wheel" id="wheel">
-          <svg viewBox="0 0 280 280" preserveAspectRatio="none">
+          <svg viewBox="0 0 320 320" preserveAspectRatio="none">
             <path id="swipePath" d=""></path>
           </svg>
         </div>
@@ -467,11 +472,14 @@
   </div>
 
 <script>
-  const ROWS = 10;
-  const COLS = 10;
+  /* ===== SETTINGS ===== */
   const EXTRA_LETTERS = 2;
   const SHUFFLE_MCQ_OPTIONS = true;
 
+  /* Wheel coordinate system (independent of CSS size) */
+  const WHEEL_VIEW = 320;
+
+  /* ===== ROUNDS ===== */
   const rounds = [
     { word:"SECURITY", theme:"Browser Protection", clue:"A browser must protect users from online threats.",
       mcq:{ q:"Which is the best meaning of browser security?",
@@ -523,13 +531,16 @@
         answerIndex:1 } },
   ];
 
+  /* ===== STATE ===== */
   let currentRoundIndex = 0;
   let validated = new Set();
+
   let wheelLetters = [];
   let selectedIndices = [];
   let currentWord = "";
-  let placement = null;
-  let gridState = makeEmptyGrid();
+
+  let placement = null; // still used for pattern
+  let wordSlots = [];   // array of {letter, revealed}
 
   const $ = (id) => document.getElementById(id);
 
@@ -543,89 +554,65 @@
   }
   function randInt(min,max){ return Math.floor(Math.random()*(max-min+1))+min; }
 
-  function makeEmptyGrid(){
-    const grid = [];
-    for(let r=0;r<ROWS;r++){
-      const row = [];
-      for(let c=0;c<COLS;c++){
-        row.push({ letter:"", active:false, revealed:false });
-      }
-      grid.push(row);
-    }
-    return grid;
-  }
-
+  /* ===== PLACEMENT (pattern only, no big grid) ===== */
   function choosePlacement(word){
     const dir = Math.random() < 0.5 ? "H" : "V";
     if(dir === "H"){
-      const r0 = randInt(0, ROWS-1);
-      const c0 = randInt(0, COLS-word.length);
-      const cells = [];
-      for(let i=0;i<word.length;i++) cells.push({r:r0, c:c0+i});
-      return {r0,c0,dir,cells};
+      const r0 = randInt(0, 9);
+      const c0 = randInt(0, 10-word.length);
+      return {r0,c0,dir};
     }else{
-      const r0 = randInt(0, ROWS-word.length);
-      const c0 = randInt(0, COLS-1);
-      const cells = [];
-      for(let i=0;i<word.length;i++) cells.push({r:r0+i, c:c0});
-      return {r0,c0,dir,cells};
+      const r0 = randInt(0, 10-word.length);
+      const c0 = randInt(0, 9);
+      return {r0,c0,dir};
     }
   }
 
-  function applyPlacement(word, pl){
-    gridState = makeEmptyGrid();
-    pl.cells.forEach((pos, i)=>{
-      gridState[pos.r][pos.c].letter = word[i];
-      gridState[pos.r][pos.c].active = true;
-      gridState[pos.r][pos.c].revealed = validated.has(word);
+  /* ===== SLOTS RENDER (tight, no extra space) ===== */
+  function buildSlots(word){
+    wordSlots = word.split("").map(ch => ({ letter: ch, revealed: validated.has(word) }));
+    renderSlots();
+  }
+
+  function renderSlots(){
+    const round = rounds[currentRoundIndex];
+    const slotsEl = $("slots");
+    slotsEl.innerHTML = "";
+
+    // layout: 1 row for H, 1 column for V
+    if(placement.dir === "H"){
+      slotsEl.style.gridAutoFlow = "column";
+      slotsEl.style.gridTemplateColumns = `repeat(${wordSlots.length}, 44px)`;
+      slotsEl.style.gridTemplateRows = `repeat(1, 44px)`;
+    }else{
+      slotsEl.style.gridAutoFlow = "row";
+      slotsEl.style.gridTemplateColumns = `repeat(1, 44px)`;
+      slotsEl.style.gridTemplateRows = `repeat(${wordSlots.length}, 44px)`;
+    }
+
+    wordSlots.forEach(s=>{
+      const d = document.createElement("div");
+      d.className = "slot locked";
+      if(s.revealed){
+        d.classList.add("reveal");
+        d.textContent = s.letter;
+      }else{
+        d.textContent = "";
+      }
+      slotsEl.appendChild(d);
     });
-    renderGrid();
   }
 
-  /* ✅ CROPPED GRID RENDER */
-  function renderGrid(){
-    const gridEl = $("grid");
-    gridEl.innerHTML = "";
-
-    let minRow = ROWS, maxRow = -1;
-    for(let r=0;r<ROWS;r++){
-      for(let c=0;c<COLS;c++){
-        if(gridState[r][c].active){
-          minRow = Math.min(minRow, r);
-          maxRow = Math.max(maxRow, r);
-        }
-      }
-    }
-    if(minRow > maxRow){
-      minRow = 0; maxRow = ROWS-1;
-    }
-
-    const pad = 1;
-    const start = Math.max(0, minRow - pad);
-    const end   = Math.min(ROWS - 1, maxRow + pad);
-
-    for(let r=start; r<=end; r++){
-      for(let c=0;c<COLS;c++){
-        const cell = gridState[r][c];
-        const d = document.createElement("div");
-        d.className = "cell";
-        if(!cell.active) d.classList.add("blank");
-        if(cell.active) d.classList.add("locked");
-        if(cell.revealed) d.classList.add("reveal");
-        d.textContent = cell.revealed ? cell.letter : "";
-        gridEl.appendChild(d);
-      }
-    }
+  function revealSlots(){
+    wordSlots.forEach(s => s.revealed = true);
+    renderSlots();
   }
 
-  function revealWordOnGrid(){
-    placement.cells.forEach((pos)=>{ gridState[pos.r][pos.c].revealed = true; });
-    renderGrid();
-  }
-
+  /* ===== SAFE WHEEL: no consecutive letters adjacent (circular) ===== */
   function buildWheelLetters(word){
     const base = word.split("");
     const alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("");
+
     const extras = [];
     for(let i=0;i<EXTRA_LETTERS;i++){
       extras.push(alphabet[randInt(0, alphabet.length-1)]);
@@ -645,33 +632,31 @@
       for(let i=0;i<candidate.length;i++){
         const a = candidate[i];
         const b = candidate[(i+1) % candidate.length];
-        if(forbidden.has(a + "|" + b)){
-          ok = false;
-          break;
-        }
+        if(forbidden.has(a + "|" + b)){ ok = false; break; }
       }
       if(ok) return candidate;
     }
     return shuffle(letters);
   }
 
+  /* ===== WHEEL ===== */
   function renderWheel(){
     const wheel = $("wheel");
     wheel.innerHTML = `
-      <svg viewBox="0 0 280 280" preserveAspectRatio="none">
+      <svg viewBox="0 0 ${WHEEL_VIEW} ${WHEEL_VIEW}" preserveAspectRatio="none">
         <path id="swipePath" d=""></path>
       </svg>
     `;
 
-    const centerX = 140, centerY = 140;
-    const radius = 95;
+    const center = WHEEL_VIEW/2;
+    const radius = WHEEL_VIEW * 0.34; // ✅ bigger usable ring
     const n = wheelLetters.length;
 
     const positions = [];
     for(let i=0;i<n;i++){
       const angle = (Math.PI*2*i/n) - Math.PI/2;
-      const x = centerX + radius*Math.cos(angle);
-      const y = centerY + radius*Math.sin(angle);
+      const x = center + radius*Math.cos(angle);
+      const y = center + radius*Math.sin(angle);
       positions.push({x,y});
     }
 
@@ -681,13 +666,16 @@
       div.dataset.index = String(i);
       div.textContent = ch;
 
+      // letter size from CSS var; use computed pixels for centering
+      const px = parseFloat(getComputedStyle(document.documentElement).getPropertyValue("--letterSize")) || 60;
+      const half = px/2;
+
       const {x,y} = positions[i];
-      div.style.left = (x - 27) + "px";
-      div.style.top  = (y - 27) + "px";
+      div.style.left = `calc(${(x)}px * (var(--wheelSize) / ${WHEEL_VIEW}px) - ${half}px)`;
+      div.style.top  = `calc(${(y)}px * (var(--wheelSize) / ${WHEEL_VIEW}px) - ${half}px)`;
 
       div.addEventListener("pointerdown", (e)=>startSelect(e, i));
       div.addEventListener("pointerenter", (e)=>continueSelect(e, i));
-
       wheel.appendChild(div);
     });
 
@@ -753,18 +741,18 @@
 
   function getLocalPoint(e){
     const rect = $("wheel").getBoundingClientRect();
-    const x = (e.clientX - rect.left) * (280 / rect.width);
-    const y = (e.clientY - rect.top)  * (280 / rect.height);
+    const x = (e.clientX - rect.left) * (WHEEL_VIEW / rect.width);
+    const y = (e.clientY - rect.top)  * (WHEEL_VIEW / rect.height);
     return {x,y};
   }
 
   function getLetterCenter(idx){
     const el = document.querySelector(`.letter[data-index="${idx}"]`);
-    if(!el) return {x:140,y:140};
+    if(!el) return {x:WHEEL_VIEW/2,y:WHEEL_VIEW/2};
     const wheelRect = $("wheel").getBoundingClientRect();
     const r = el.getBoundingClientRect();
-    const cx = ( (r.left + r.width/2) - wheelRect.left ) * (280 / wheelRect.width);
-    const cy = ( (r.top  + r.height/2) - wheelRect.top )  * (280 / wheelRect.height);
+    const cx = ( (r.left + r.width/2) - wheelRect.left ) * (WHEEL_VIEW / wheelRect.width);
+    const cy = ( (r.top  + r.height/2) - wheelRect.top )  * (WHEEL_VIEW / wheelRect.height);
     return {x:cx, y:cy};
   }
 
@@ -791,6 +779,7 @@
     $("currentWord").textContent = currentWord || " ";
   }
 
+  /* ===== MCQ ===== */
   function openMCQ(round){
     $("mcqModal").style.display = "block";
     $("mcqBadge").textContent = `MCQ check`;
@@ -802,6 +791,7 @@
 
     const optionItems = round.mcq.options.map((t,i)=>({t,i}));
     const rendered = SHUFFLE_MCQ_OPTIONS ? shuffle(optionItems) : optionItems;
+
     opts.dataset.correct = String(rendered.findIndex(x => x.i === round.mcq.answerIndex));
 
     rendered.forEach((o, idx)=>{
@@ -845,6 +835,7 @@
     setTimeout(()=>b.remove(), 600);
   }
 
+  /* ===== ROUND ===== */
   function setRound(i){
     currentRoundIndex = i;
     const round = rounds[currentRoundIndex];
@@ -856,11 +847,13 @@
     $("currentClueText").innerHTML = `<b>Clue:</b> ${round.clue}`;
 
     placement = choosePlacement(round.word);
-    applyPlacement(round.word, placement);
 
+    // pattern label only
     const rowLabel = placement.r0 + 1;
     const colLabel = String.fromCharCode(65 + placement.c0);
     $("patternText").textContent = `Pattern: ${placement.dir}-${rowLabel}${colLabel}`;
+
+    buildSlots(round.word);
 
     wheelLetters = buildWheelLetters(round.word);
     renderWheel();
@@ -881,6 +874,7 @@
     }
   }
 
+  /* ===== ACTIONS ===== */
   $("submitBtn").addEventListener("click", ()=>{
     const round = rounds[currentRoundIndex];
     if(currentWord !== round.word){
@@ -925,7 +919,7 @@
     const round = rounds[currentRoundIndex];
     validated.add(round.word);
 
-    revealWordOnGrid();
+    revealSlots();
     addToken();
     burst();
     closeMCQ();
@@ -938,6 +932,13 @@
     checkCompletion();
   });
 
+  /* Ensure wheel stays aligned on resize */
+  window.addEventListener("resize", ()=>{
+    renderWheel();
+    resetSelection();
+  });
+
+  /* INIT */
   (function init(){
     $("progressText").textContent = `0 / ${rounds.length}`;
     setRound(0);
