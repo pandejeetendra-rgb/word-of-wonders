@@ -1,242 +1,891 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<title>Word of Wonders – GBL</title>
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Word of Wonders – GBL (Improved)</title>
+  <style>
+    :root{
+      --bg1:#6ec6ff;
+      --bg2:#7c4dff;
+      --card:#ffffffee;
+      --ink:#1f2a37;
+      --muted:#6b7280;
+      --tile:#ffffff;
+      --tile2:#f3f4f6;
+      --brand:#3b82f6;
+      --good:#22c55e;
+      --warn:#ef4444;
+      --shadow: 0 10px 25px rgba(0,0,0,.15);
+      --shadow2: 0 6px 16px rgba(0,0,0,.12);
+      --radius: 18px;
+    }
 
-<style>
-body {
-    font-family: Arial, sans-serif;
-    background: #f4f6f8;
-    margin: 0;
-    padding: 0;
-    text-align: center;
-}
+    *{box-sizing:border-box}
+    body{
+      margin:0;
+      font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+      color:var(--ink);
+      min-height:100vh;
+      background:
+        radial-gradient(900px 600px at 10% 10%, rgba(255,255,255,.35), transparent 55%),
+        radial-gradient(900px 600px at 90% 15%, rgba(255,255,255,.25), transparent 55%),
+        linear-gradient(135deg, var(--bg1), var(--bg2));
+      display:flex;
+      justify-content:center;
+      padding:18px 12px 28px;
+    }
 
-h1 {
-    background: #2c3e50;
-    color: white;
-    padding: 12px;
-    margin: 0;
-}
+    .wrap{
+      width:min(460px, 96vw);
+    }
 
-#gameArea {
-    max-width: 420px;
-    margin: 20px auto;
-    background: white;
-    padding: 15px;
-    border-radius: 10px;
-}
+    header{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:10px;
+      margin:6px 4px 12px;
+    }
 
-#currentWord {
-    font-size: 22px;
-    margin: 10px 0;
-    min-height: 30px;
-}
+    .title{
+      display:flex;
+      flex-direction:column;
+      gap:2px;
+      color:white;
+      text-align:left;
+    }
+    .title h1{
+      margin:0;
+      font-size:18px;
+      font-weight:800;
+      letter-spacing:.2px;
+    }
+    .title small{
+      opacity:.9;
+      font-size:12px;
+    }
 
-.letters {
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: center;
-}
+    .pill{
+      background: rgba(255,255,255,.18);
+      color:#fff;
+      padding:8px 10px;
+      border-radius:999px;
+      font-size:12px;
+      display:flex;
+      align-items:center;
+      gap:8px;
+      backdrop-filter: blur(8px);
+      border: 1px solid rgba(255,255,255,.2);
+    }
+    .pill b{font-weight:800}
 
-.letter {
-    width: 50px;
-    height: 50px;
-    margin: 6px;
-    background: #3498db;
-    color: white;
-    font-size: 20px;
-    line-height: 50px;
-    border-radius: 50%;
-    cursor: pointer;
-    user-select: none;
-}
+    .card{
+      background: var(--card);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      padding:14px;
+      border: 1px solid rgba(255,255,255,.7);
+      backdrop-filter: blur(10px);
+    }
 
-.letter.used {
-    background: #95a5a6;
-    pointer-events: none;
-}
+    .sectionTitle{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      margin:2px 2px 10px;
+    }
+    .sectionTitle .left{
+      display:flex; flex-direction:column; gap:3px;
+    }
+    .sectionTitle .left b{
+      font-size:14px;
+    }
+    .sectionTitle .left span{
+      font-size:12px;
+      color:var(--muted);
+    }
+    .progress{
+      font-size:12px;
+      color:var(--muted);
+    }
 
-button {
-    padding: 8px 14px;
-    margin: 6px;
-    font-size: 14px;
-    cursor: pointer;
-}
+    /* Crossword grid */
+    .grid{
+      display:grid;
+      grid-template-columns: repeat(6, 1fr);
+      gap:8px;
+      padding:8px;
+      background: rgba(255,255,255,.55);
+      border-radius: 16px;
+      box-shadow: var(--shadow2);
+      border:1px solid rgba(255,255,255,.65);
+    }
+    .cell{
+      aspect-ratio: 1 / 1;
+      border-radius: 12px;
+      background: linear-gradient(180deg, #fff, #eef2ff);
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      font-weight:900;
+      font-size:16px;
+      color:#111827;
+      position:relative;
+      user-select:none;
+      overflow:hidden;
+    }
+    .cell.blank{
+      background: rgba(255,255,255,.25);
+      border:1px dashed rgba(255,255,255,.65);
+      color:transparent;
+    }
+    .cell.reveal{
+      animation: pop .18s ease-out;
+    }
+    @keyframes pop{
+      from{transform:scale(.96); filter:brightness(.95)}
+      to{transform:scale(1); filter:brightness(1)}
+    }
+    .cell.locked::after{
+      content:"";
+      position:absolute;
+      inset:-20px;
+      background: radial-gradient(circle at 30% 30%, rgba(59,130,246,.20), transparent 55%);
+      pointer-events:none;
+    }
 
-#tokens {
-    margin-top: 15px;
-}
+    /* Current word */
+    .currentWord{
+      margin:12px 2px 10px;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:10px;
+    }
+    .wordBox{
+      flex:1;
+      background:#ffffffcc;
+      border-radius: 14px;
+      padding:10px 12px;
+      box-shadow: var(--shadow2);
+      border: 1px solid rgba(255,255,255,.7);
+      min-height:44px;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      font-weight:900;
+      letter-spacing: 1px;
+    }
+    .hint{
+      font-size:12px;
+      color:var(--muted);
+      text-align:right;
+      min-width:120px;
+    }
 
-.token {
-    display: inline-block;
-    width: 20px;
-    height: 20px;
-    background: #27ae60;
-    border-radius: 50%;
-    margin: 3px;
-}
+    /* Wheel area */
+    .wheelWrap{
+      margin-top:10px;
+      background: rgba(255,255,255,.55);
+      border: 1px solid rgba(255,255,255,.65);
+      box-shadow: var(--shadow2);
+      border-radius: 20px;
+      padding:14px 10px 10px;
+      position:relative;
+      overflow:hidden;
+    }
+    .wheelHeader{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      padding:0 6px 10px;
+      color:var(--muted);
+      font-size:12px;
+    }
 
-/* MCQ Modal */
-#mcqModal {
-    display: none;
-    position: fixed;
-    top: 0; left: 0;
-    width: 100%; height: 100%;
-    background: rgba(0,0,0,0.6);
-}
+    .wheel{
+      width: 280px;
+      height: 280px;
+      margin: 0 auto;
+      position: relative;
+      border-radius: 50%;
+      background: radial-gradient(circle at 40% 35%, rgba(255,255,255,.95), rgba(255,255,255,.55));
+      border: 1px solid rgba(255,255,255,.8);
+      box-shadow: inset 0 0 0 10px rgba(59,130,246,.08), var(--shadow2);
+      touch-action: none;
+      user-select:none;
+    }
 
-#mcqBox {
-    background: white;
-    max-width: 400px;
-    margin: 80px auto;
-    padding: 15px;
-    border-radius: 8px;
-    text-align: left;
-}
+    .letter{
+      width: 54px;
+      height: 54px;
+      border-radius: 50%;
+      position:absolute;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      font-weight:900;
+      font-size:18px;
+      background: linear-gradient(180deg, #3b82f6, #2563eb);
+      color:white;
+      box-shadow: 0 10px 18px rgba(37,99,235,.25);
+      border: 1px solid rgba(255,255,255,.35);
+    }
+    .letter.selected{
+      background: linear-gradient(180deg, #22c55e, #16a34a);
+    }
+    .letter.used{
+      opacity:.45;
+      filter:saturate(.8);
+    }
 
-.mcq-option {
-    margin: 6px 0;
-}
-</style>
+    .wheel svg{
+      position:absolute;
+      inset:0;
+      pointer-events:none;
+    }
+    .wheel path{
+      stroke: rgba(34,197,94,.9);
+      stroke-width: 10;
+      stroke-linecap: round;
+      fill:none;
+      filter: drop-shadow(0 6px 10px rgba(22,163,74,.25));
+    }
+
+    .actions{
+      display:flex;
+      gap:10px;
+      justify-content:center;
+      margin-top:12px;
+      flex-wrap:wrap;
+    }
+    .btn{
+      border:none;
+      border-radius: 12px;
+      padding:10px 14px;
+      font-weight:800;
+      cursor:pointer;
+      box-shadow: var(--shadow2);
+      background:#fff;
+      color:var(--ink);
+    }
+    .btn.primary{
+      background: linear-gradient(180deg, #111827, #0b1220);
+      color:#fff;
+    }
+    .btn.ghost{
+      background: rgba(255,255,255,.75);
+      color:var(--ink);
+    }
+
+    /* Tokens */
+    .tokens{
+      margin-top:12px;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:10px;
+      padding:10px 12px;
+      border-radius: 14px;
+      background: rgba(255,255,255,.75);
+      border: 1px solid rgba(255,255,255,.7);
+      box-shadow: var(--shadow2);
+    }
+    .tokenRow{
+      display:flex; gap:6px; flex-wrap:wrap;
+      justify-content:flex-end;
+    }
+    .token{
+      width:18px; height:18px; border-radius:50%;
+      background: radial-gradient(circle at 30% 30%, #86efac, #22c55e);
+      box-shadow: 0 6px 12px rgba(34,197,94,.25);
+      border:1px solid rgba(255,255,255,.55);
+    }
+
+    /* MCQ modal */
+    .modal{
+      display:none;
+      position:fixed;
+      inset:0;
+      background: rgba(0,0,0,.55);
+      padding:18px 12px;
+      z-index:50;
+    }
+    .modalBox{
+      width:min(520px, 96vw);
+      margin: 9vh auto 0;
+      background:#fff;
+      border-radius: 18px;
+      padding:14px;
+      box-shadow: var(--shadow);
+    }
+    .modalTop{
+      display:flex;
+      align-items:flex-start;
+      justify-content:space-between;
+      gap:10px;
+    }
+    .badge{
+      background: rgba(59,130,246,.12);
+      color:#1d4ed8;
+      border:1px solid rgba(59,130,246,.25);
+      padding:6px 10px;
+      border-radius:999px;
+      font-size:12px;
+      font-weight:800;
+    }
+    .q{
+      margin:10px 0 8px;
+      font-weight:800;
+      line-height:1.35;
+    }
+    .opt{
+      display:flex;
+      gap:10px;
+      align-items:flex-start;
+      padding:10px;
+      border-radius: 12px;
+      border:1px solid #e5e7eb;
+      margin:8px 0;
+      cursor:pointer;
+    }
+    .opt:hover{background:#f9fafb}
+    .opt input{margin-top:3px}
+    .modalActions{
+      display:flex;
+      gap:10px;
+      justify-content:flex-end;
+      margin-top:10px;
+    }
+    .msg{
+      margin-top:8px;
+      font-size:12px;
+      color:var(--muted);
+    }
+
+    @media (max-width:380px){
+      .wheel{ width: 250px; height: 250px; }
+      .letter{ width:50px; height:50px; font-size:17px; }
+      .grid{ gap:7px; }
+    }
+  </style>
 </head>
 
 <body>
+  <div class="wrap">
+    <header>
+      <div class="title">
+        <h1>Word of Wonders – GBL</h1>
+        <small>Find word → mandatory MCQ → correct required to progress</small>
+      </div>
+      <div class="pill">
+        <span>Tokens</span> <b id="tokenCount">0</b>
+      </div>
+    </header>
 
-<h1>Word of Wonders</h1>
+    <div class="card">
+      <div class="sectionTitle">
+        <div class="left">
+          <b>Crossword Board</b>
+          <span id="levelHint">Complete all words to finish the level</span>
+        </div>
+        <div class="progress" id="progressText">0 / 0</div>
+      </div>
 
-<div id="gameArea">
-    <p><strong>Find the correct words</strong></p>
+      <div class="grid" id="grid"></div>
 
-    <div id="currentWord"></div>
+      <div class="currentWord">
+        <div class="wordBox" id="currentWord"> </div>
+        <div class="hint" id="decisionHint">Decision: —</div>
+      </div>
 
-    <div class="letters" id="letters"></div>
+      <div class="wheelWrap">
+        <div class="wheelHeader">
+          <span>Swipe/select letters to form the word</span>
+          <span id="patternText">Pattern: —</span>
+        </div>
 
-    <button onclick="submitWord()">Submit Word</button>
-    <button onclick="resetWord()">Reset</button>
+        <div class="wheel" id="wheel">
+          <svg viewBox="0 0 280 280" preserveAspectRatio="none">
+            <path id="swipePath" d=""></path>
+          </svg>
+        </div>
 
-    <div id="tokens"></div>
-</div>
+        <div class="actions">
+          <button class="btn primary" id="submitBtn">Submit Word</button>
+          <button class="btn ghost" id="resetBtn">Reset</button>
+          <button class="btn ghost" id="shuffleBtn">Shuffle</button>
+        </div>
 
-<!-- MCQ Modal -->
-<div id="mcqModal">
-    <div id="mcqBox">
-        <p id="mcqQuestion"></p>
-        <div id="mcqOptions"></div>
-        <button onclick="submitMCQ()">Submit Answer</button>
+        <div class="tokens">
+          <div>
+            <b>Decision Tokens</b><div class="msg">Earn 1 token per validated word</div>
+          </div>
+          <div class="tokenRow" id="tokenRow"></div>
+        </div>
+      </div>
     </div>
-</div>
+
+    <!-- MCQ modal -->
+    <div class="modal" id="mcqModal">
+      <div class="modalBox">
+        <div class="modalTop">
+          <div class="badge" id="mcqBadge">MCQ</div>
+          <div class="badge" id="mustPass">Correct required</div>
+        </div>
+        <div class="q" id="mcqQuestion"></div>
+        <div id="mcqOptions"></div>
+        <div class="modalActions">
+          <button class="btn ghost" id="mcqReset">Clear</button>
+          <button class="btn primary" id="mcqSubmit">Submit Answer</button>
+        </div>
+        <div class="msg" id="mcqMsg"></div>
+      </div>
+    </div>
+
+  </div>
 
 <script>
-// ---------- GAME DATA ----------
-const targetWords = ["SAFE", "BROWSER"];
-let foundWords = [];
+/* =======================
+   CONFIG (Edit here)
+======================= */
 
-const letters = ["S","A","F","E","B","R","O","W","S","E","R"];
-
-const mcqBank = {
-    SAFE: {
-        q: "Which practice improves browser safety?",
-        options: ["Ignoring updates", "Using strong passwords", "Sharing credentials", "Disabling security"],
-        answer: 1
-    },
-    BROWSER: {
-        q: "A secure browser should have which feature?",
-        options: ["Auto malware download", "Frequent crashes", "Security updates", "No privacy settings"],
-        answer: 2
+// Each item = one “word → decision → MCQ” gate.
+// Add your full bank here (BROWSER_001–BROWSER_050 etc.) easily.
+const rounds = [
+  {
+    word: "SAFE",
+    decision: "AGE / SPECS / MOBILE / PLATFORM",
+    mcq: {
+      q: "Which practice improves browser safety?",
+      options: ["Ignoring updates", "Using strong passwords", "Sharing credentials", "Disabling security"],
+      answerIndex: 1
     }
-};
+  },
+  {
+    word: "BROWSER",
+    decision: "FEATURES / TABS / BOOKMARK / SEARCH / PLUGINS",
+    mcq: {
+      q: "A secure browser should have which feature?",
+      options: ["Auto malware download", "Frequent crashes", "Security updates", "No privacy settings"],
+      answerIndex: 2
+    }
+  },
+];
 
+// Board size (small, low-load)
+const ROWS = 6;
+const COLS = 6;
+
+// Extra letters in wheel (adds WoW feel; still low-load)
+const EXTRA_LETTERS = 2;
+
+// If true, each new round produces a new board placement pattern
+const NEW_PATTERN_EACH_ROUND = true;
+
+/* =======================
+   STATE
+======================= */
+let currentRoundIndex = 0;
+let validated = new Set();
+
+let wheelLetters = [];
+let selectedIndices = [];   // indices in wheelLetters
 let currentWord = "";
-let activeWord = "";
 
-// ---------- INIT ----------
-const lettersDiv = document.getElementById("letters");
-letters.forEach((l, i) => {
+let placement = null;       // {r0,c0,dir:"H"/"V", cells:[{r,c}]}
+
+/* =======================
+   HELPERS
+======================= */
+const $ = (id) => document.getElementById(id);
+
+function shuffle(arr){
+  const a = arr.slice();
+  for(let i=a.length-1;i>0;i--){
+    const j = Math.floor(Math.random()*(i+1));
+    [a[i],a[j]] = [a[j],a[i]];
+  }
+  return a;
+}
+
+function randInt(min,max){ // inclusive min, inclusive max
+  return Math.floor(Math.random()*(max-min+1))+min;
+}
+
+function clamp(v,min,max){ return Math.max(min, Math.min(max,v)); }
+
+/* =======================
+   GRID (Crossword board)
+======================= */
+function makeEmptyGrid(){
+  const grid = [];
+  for(let r=0;r<ROWS;r++){
+    const row = [];
+    for(let c=0;c<COLS;c++){
+      row.push({ letter:"", active:false, revealed:false });
+    }
+    grid.push(row);
+  }
+  return grid;
+}
+
+let gridState = makeEmptyGrid();
+
+function choosePlacement(word){
+  // Pick random H/V placement that fits
+  const dir = Math.random() < 0.5 ? "H" : "V";
+  if(dir === "H"){
+    const r0 = randInt(0, ROWS-1);
+    const c0 = randInt(0, COLS-word.length);
+    const cells = [];
+    for(let i=0;i<word.length;i++) cells.push({r:r0, c:c0+i});
+    return {r0,c0,dir,cells};
+  }else{
+    const r0 = randInt(0, ROWS-word.length);
+    const c0 = randInt(0, COLS-1);
+    const cells = [];
+    for(let i=0;i<word.length;i++) cells.push({r:r0+i, c:c0});
+    return {r0,c0,dir,cells};
+  }
+}
+
+function applyPlacement(word, pl){
+  gridState = makeEmptyGrid();
+  pl.cells.forEach((pos, i)=>{
+    gridState[pos.r][pos.c].letter = word[i];
+    gridState[pos.r][pos.c].active = true;
+    // reveal only if this word is already validated
+    gridState[pos.r][pos.c].revealed = validated.has(word);
+  });
+  renderGrid();
+}
+
+function renderGrid(){
+  const gridEl = $("grid");
+  gridEl.innerHTML = "";
+  for(let r=0;r<ROWS;r++){
+    for(let c=0;c<COLS;c++){
+      const cell = gridState[r][c];
+      const d = document.createElement("div");
+      d.className = "cell";
+      if(!cell.active) d.classList.add("blank");
+      if(cell.active) d.classList.add("locked");
+      if(cell.revealed) d.classList.add("reveal");
+
+      d.textContent = cell.revealed ? cell.letter : (cell.active ? "" : "");
+      gridEl.appendChild(d);
+    }
+  }
+}
+
+/* =======================
+   WHEEL (Letter circle + swipe line)
+======================= */
+function buildWheelLetters(word){
+  // letters from word + some extras
+  const base = word.split("");
+  const alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("");
+  let extras = [];
+  for(let i=0;i<EXTRA_LETTERS;i++){
+    extras.push(alphabet[randInt(0, alphabet.length-1)]);
+  }
+  // shuffle every time = new pattern each word / each MCQ
+  return shuffle(base.concat(extras));
+}
+
+function renderWheel(){
+  const wheel = $("wheel");
+  wheel.innerHTML = `
+    <svg viewBox="0 0 280 280" preserveAspectRatio="none">
+      <path id="swipePath" d=""></path>
+    </svg>
+  `;
+  const centerX = 140, centerY = 140;
+  const radius = 95;
+  const n = wheelLetters.length;
+
+  // place letters around circle
+  const positions = [];
+  for(let i=0;i<n;i++){
+    const angle = (Math.PI*2*i/n) - Math.PI/2;
+    const x = centerX + radius*Math.cos(angle);
+    const y = centerY + radius*Math.sin(angle);
+    positions.push({x,y});
+  }
+
+  wheelLetters.forEach((ch, i)=>{
     const div = document.createElement("div");
     div.className = "letter";
-    div.innerText = l;
-    div.onclick = () => selectLetter(div, l);
-    lettersDiv.appendChild(div);
+    div.dataset.index = String(i);
+    div.textContent = ch;
+
+    // center on position
+    const {x,y} = positions[i];
+    div.style.left = (x - 27) + "px";
+    div.style.top  = (y - 27) + "px";
+
+    div.addEventListener("pointerdown", (e)=>startSelect(e, i));
+    div.addEventListener("pointerenter", (e)=>continueSelect(e, i));
+    wheel.appendChild(div);
+  });
+
+  // pointer move/up on wheel for swiping feel
+  wheel.addEventListener("pointermove", onPointerMove);
+  window.addEventListener("pointerup", endSelect);
+
+  updateSwipePath();
+}
+
+let isSelecting = false;
+let lastPointer = {x:0,y:0};
+
+function startSelect(e, idx){
+  e.preventDefault();
+  isSelecting = true;
+  selectedIndices = [];
+  currentWord = "";
+  markSelected(idx);
+  lastPointer = getLocalPoint(e);
+  updateCurrentWord();
+}
+
+function continueSelect(e, idx){
+  if(!isSelecting) return;
+  // only if pointer is down (swipe)
+  if(e.buttons === 0) return;
+  markSelected(idx);
+  lastPointer = getLocalPoint(e);
+  updateCurrentWord();
+}
+
+function onPointerMove(e){
+  if(!isSelecting) return;
+  lastPointer = getLocalPoint(e);
+  updateSwipePath(true); // include live pointer line
+}
+
+function endSelect(){
+  if(!isSelecting) return;
+  isSelecting = false;
+  updateSwipePath(false);
+}
+
+function markSelected(idx){
+  if(selectedIndices.includes(idx)) return;
+  selectedIndices.push(idx);
+  currentWord += wheelLetters[idx];
+
+  // UI
+  document.querySelectorAll(".letter").forEach(el=>{
+    const i = parseInt(el.dataset.index,10);
+    el.classList.toggle("selected", selectedIndices.includes(i));
+  });
+  updateSwipePath(true);
+}
+
+function resetSelection(){
+  selectedIndices = [];
+  currentWord = "";
+  document.querySelectorAll(".letter").forEach(el=>el.classList.remove("selected"));
+  $("swipePath").setAttribute("d","");
+  updateCurrentWord();
+}
+
+function getLocalPoint(e){
+  const rect = $("wheel").getBoundingClientRect();
+  const x = (e.clientX - rect.left) * (280 / rect.width);
+  const y = (e.clientY - rect.top)  * (280 / rect.height);
+  return {x,y};
+}
+
+function getLetterCenter(idx){
+  const el = document.querySelector(`.letter[data-index="${idx}"]`);
+  if(!el) return {x:140,y:140};
+  // convert element center to SVG coords (280x280)
+  const wheelRect = $("wheel").getBoundingClientRect();
+  const r = el.getBoundingClientRect();
+  const cx = ( (r.left + r.width/2) - wheelRect.left ) * (280 / wheelRect.width);
+  const cy = ( (r.top  + r.height/2) - wheelRect.top )  * (280 / wheelRect.height);
+  return {x:cx, y:cy};
+}
+
+function updateSwipePath(withPointer=false){
+  const pts = selectedIndices.map(getLetterCenter);
+  if(withPointer && isSelecting && pts.length>0){
+    pts.push(lastPointer);
+  }
+  if(pts.length<2){
+    $("swipePath").setAttribute("d","");
+    return;
+  }
+  let d = `M ${pts[0].x.toFixed(2)} ${pts[0].y.toFixed(2)}`;
+  for(let i=1;i<pts.length;i++){
+    d += ` L ${pts[i].x.toFixed(2)} ${pts[i].y.toFixed(2)}`;
+  }
+  $("swipePath").setAttribute("d", d);
+}
+
+function updateCurrentWord(){
+  $("currentWord").textContent = currentWord || " ";
+}
+
+/* =======================
+   MCQ (mandatory gate)
+======================= */
+function openMCQ(round){
+  $("mcqModal").style.display = "block";
+  $("mcqBadge").textContent = `MCQ for word: ${round.word}`;
+  $("mcqQuestion").textContent = round.mcq.q;
+  $("mcqMsg").textContent = "Answer correctly to validate this word and unlock a token.";
+
+  const opts = $("mcqOptions");
+  opts.innerHTML = "";
+
+  // shuffle options for fairness? (If you need fixed order for control group, set false)
+  const shuffleOptions = true;
+  const optionItems = round.mcq.options.map((t,i)=>({t,i}));
+  const rendered = shuffleOptions ? shuffle(optionItems) : optionItems;
+
+  // store mapping so correct remains correct after shuffle
+  opts.dataset.correct = String(rendered.findIndex(x => x.i === round.mcq.answerIndex));
+
+  rendered.forEach((o, idx)=>{
+    const div = document.createElement("label");
+    div.className = "opt";
+    div.innerHTML = `
+      <input type="radio" name="mcq" value="${idx}">
+      <div><b>${String.fromCharCode(65+idx)}.</b> ${o.t}</div>
+    `;
+    opts.appendChild(div);
+  });
+}
+
+function closeMCQ(){
+  $("mcqModal").style.display = "none";
+}
+
+/* =======================
+   ROUND FLOW
+======================= */
+function setRound(i){
+  currentRoundIndex = i;
+  const round = rounds[currentRoundIndex];
+
+  $("decisionHint").textContent = `Decision: ${round.decision}`;
+  $("progressText").textContent = `${validated.size} / ${rounds.length}`;
+
+  // NEW crossword placement each round (your requirement)
+  placement = choosePlacement(round.word);
+  applyPlacement(round.word, placement);
+
+  // NEW wheel pattern each round (your requirement)
+  wheelLetters = buildWheelLetters(round.word);
+  renderWheel();
+
+  // show pattern info
+  const pattern = `${placement.dir}-${placement.r0+1}${String.fromCharCode(65+placement.c0)}`;
+  $("patternText").textContent = `Pattern: ${pattern}`;
+
+  resetSelection();
+}
+
+function addToken(){
+  const t = document.createElement("div");
+  t.className = "token";
+  $("tokenRow").appendChild(t);
+  $("tokenCount").textContent = String(validated.size);
+}
+
+function revealWordOnGrid(word){
+  // reveal letters for current placement
+  placement.cells.forEach((pos, idx)=>{
+    gridState[pos.r][pos.c].revealed = true;
+  });
+  renderGrid();
+}
+
+function checkCompletion(){
+  $("progressText").textContent = `${validated.size} / ${rounds.length}`;
+  if(validated.size === rounds.length){
+    // lightweight completion feedback (no heavy animation to keep cognitive load low)
+    setTimeout(()=>{
+      alert("Level Complete! All words validated.");
+    }, 50);
+  }
+}
+
+/* =======================
+   ACTIONS
+======================= */
+$("submitBtn").addEventListener("click", ()=>{
+  const round = rounds[currentRoundIndex];
+  const attempt = currentWord;
+
+  if(attempt !== round.word){
+    alert("Not matched. Try again.");
+    return;
+  }
+  // If already validated, just move on
+  if(validated.has(round.word)){
+    alert("Already validated.");
+    return;
+  }
+  openMCQ(round);
 });
 
-// ---------- FUNCTIONS ----------
-function selectLetter(div, letter) {
-    currentWord += letter;
-    div.classList.add("used");
-    updateWord();
-}
+$("resetBtn").addEventListener("click", resetSelection);
 
-function updateWord() {
-    document.getElementById("currentWord").innerText = currentWord;
-}
+$("shuffleBtn").addEventListener("click", ()=>{
+  // Shuffle letter pattern anytime
+  wheelLetters = shuffle(wheelLetters);
+  renderWheel();
+  resetSelection();
+});
 
-function resetWord() {
-    currentWord = "";
-    document.querySelectorAll(".letter").forEach(l => l.classList.remove("used"));
-    updateWord();
-}
+$("mcqReset").addEventListener("click", ()=>{
+  document.querySelectorAll('input[name="mcq"]').forEach(r=>r.checked=false);
+  $("mcqMsg").textContent = "Selection cleared.";
+});
 
-function submitWord() {
-    if (targetWords.includes(currentWord) && !foundWords.includes(currentWord)) {
-        activeWord = currentWord;
-        showMCQ(currentWord);
-    } else {
-        alert("Incorrect or already used word");
-        resetWord();
-    }
-}
+$("mcqSubmit").addEventListener("click", ()=>{
+  const sel = document.querySelector('input[name="mcq"]:checked');
+  if(!sel){
+    $("mcqMsg").textContent = "Please select an option.";
+    return;
+  }
+  const correct = parseInt($("mcqOptions").dataset.correct,10);
+  const picked = parseInt(sel.value,10);
 
-function showMCQ(word) {
-    const mcq = mcqBank[word];
-    document.getElementById("mcqQuestion").innerText = mcq.q;
-    const optionsDiv = document.getElementById("mcqOptions");
-    optionsDiv.innerHTML = "";
-    mcq.options.forEach((opt, idx) => {
-        optionsDiv.innerHTML += `
-            <div class="mcq-option">
-                <input type="radio" name="mcq" value="${idx}"> ${opt}
-            </div>`;
-    });
-    document.getElementById("mcqModal").style.display = "block";
-}
+  if(picked !== correct){
+    $("mcqMsg").textContent = "Incorrect. Try again (no penalty).";
+    return;
+  }
 
-function submitMCQ() {
-    const selected = document.querySelector('input[name="mcq"]:checked');
-    if (!selected) {
-        alert("Please select an option");
-        return;
-    }
-    const correct = mcqBank[activeWord].answer;
-    if (parseInt(selected.value) === correct) {
-        foundWords.push(activeWord);
-        addToken();
-        closeMCQ();
-        resetWord();
-        checkCompletion();
-    } else {
-        alert("Incorrect answer. Try again.");
-    }
-}
+  const round = rounds[currentRoundIndex];
+  validated.add(round.word);
+  revealWordOnGrid(round.word);
+  addToken();
+  closeMCQ();
+  resetSelection();
 
-function closeMCQ() {
-    document.getElementById("mcqModal").style.display = "none";
-}
+  // move to next round if any, else complete
+  const next = currentRoundIndex + 1;
+  if(next < rounds.length){
+    // NEW pattern next time (automatic)
+    setRound(next);
+  }
+  checkCompletion();
+});
 
-function addToken() {
-    const t = document.createElement("div");
-    t.className = "token";
-    document.getElementById("tokens").appendChild(t);
-}
-
-function checkCompletion() {
-    if (foundWords.length === targetWords.length) {
-        alert("Level Complete! All words validated.");
-    }
-}
+/* =======================
+   INIT
+======================= */
+(function init(){
+  $("progressText").textContent = `0 / ${rounds.length}`;
+  setRound(0);
+})();
 </script>
-
 </body>
 </html>
