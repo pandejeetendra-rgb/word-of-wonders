@@ -15,7 +15,7 @@
       --shadow2: 0 6px 16px rgba(0,0,0,.12);
       --radius: 18px;
 
-      /* Slightly bigger wheel, still mobile-safe */
+      /* bigger wheel, still mobile-safe */
       --wheelSize: clamp(300px, 78vw, 380px);
       --letterSize: clamp(54px, 13vw, 68px);
     }
@@ -83,10 +83,7 @@
       margin:2px 2px 10px;
       gap:10px;
     }
-    .sectionTitle .left{
-      display:flex; flex-direction:column; gap:3px;
-      text-align:left;
-    }
+    .sectionTitle .left{ display:flex; flex-direction:column; gap:3px; text-align:left; }
     .sectionTitle .left b{ font-size:14px; }
     .sectionTitle .left span{ font-size:12px; color:var(--muted); }
     .progress{ font-size:12px; color:var(--muted); white-space:nowrap; }
@@ -112,24 +109,16 @@
       border:1px solid rgba(0,0,0,.06);
     }
     .clueNo{
-      width:28px;
-      height:28px;
+      width:28px; height:28px;
       border-radius: 10px;
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      font-weight:900;
-      font-size:12px;
+      display:flex; align-items:center; justify-content:center;
+      font-weight:900; font-size:12px;
       color:#0f172a;
       background: rgba(59,130,246,.12);
       border: 1px solid rgba(59,130,246,.20);
       flex:0 0 auto;
     }
-    .clueText{
-      font-size:12px;
-      line-height:1.35;
-      color:#334155;
-    }
+    .clueText{ font-size:12px; line-height:1.35; color:#334155; }
 
     .currentWord{
       margin:10px 2px 8px;
@@ -274,7 +263,6 @@
     }
     .msg{ margin-top:8px; font-size:12px; color:var(--muted); }
 
-    /* ✅ Toast (word validated) */
     .toast{
       position:fixed;
       left:50%;
@@ -292,9 +280,7 @@
       pointer-events:none;
       z-index:60;
     }
-    .toast.show{
-      animation: toastInOut 900ms ease-in-out forwards;
-    }
+    .toast.show{ animation: toastInOut 900ms ease-in-out forwards; }
     @keyframes toastInOut{
       0%{opacity:0; transform:translateX(-50%) translateY(10px)}
       18%{opacity:1; transform:translateX(-50%) translateY(0)}
@@ -302,7 +288,6 @@
       100%{opacity:0; transform:translateX(-50%) translateY(10px)}
     }
 
-    /* MCQ modal */
     .modal{
       display:none;
       position:fixed;
@@ -391,8 +376,6 @@
         </div>
       </div>
 
-      <!-- ✅ No boxes under clue -->
-
       <div class="currentWord">
         <div class="wordBox" id="currentWord"> </div>
         <div class="decision" id="decisionHint">Theme: —</div>
@@ -446,7 +429,6 @@
 
   </div>
 
-  <!-- ✅ Toast -->
   <div class="toast" id="toast">Word validated ✅</div>
 
 <script>
@@ -542,11 +524,10 @@
     const t = $("toast");
     t.textContent = text;
     t.classList.remove("show");
-    void t.offsetWidth; // restart animation
+    void t.offsetWidth;
     t.classList.add("show");
   }
 
-  /* no consecutive letters adjacent on wheel (circular) */
   function buildWheelLetters(word){
     const base = word.split("");
     const alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("");
@@ -608,12 +589,13 @@
       div.style.left = `calc(${(x/VIEW)*100}% - (var(--letterSize) / 2))`;
       div.style.top  = `calc(${(y/VIEW)*100}% - (var(--letterSize) / 2))`;
 
+      // pointerdown is enough; move selection handled by elementFromPoint
       div.addEventListener("pointerdown", (e)=>startSelect(e, i));
-      div.addEventListener("pointerenter", (e)=>continueSelect(e, i));
       wheel.appendChild(div);
     });
 
-    wheel.addEventListener("pointermove", onPointerMove);
+    // ✅ FIX: swipe detection via elementFromPoint (mobile + desktop)
+    wheel.addEventListener("pointermove", onPointerMoveSelect);
     window.addEventListener("pointerup", endSelect);
 
     updateSwipePath();
@@ -628,28 +610,37 @@
     selectedIndices = [];
     currentWord = "";
     markSelected(idx);
-    lastPointer = getLocalPoint(e);
     updateCurrentWord();
+
+    // capture pointer so we keep receiving move events
+    $("wheel").setPointerCapture?.(e.pointerId);
   }
 
-  function continueSelect(e, idx){
+  function onPointerMoveSelect(e){
     if(!isSelecting) return;
-    if(e.buttons === 0) return;
-    markSelected(idx);
-    lastPointer = getLocalPoint(e);
-    updateCurrentWord();
-  }
 
-  function onPointerMove(e){
-    if(!isSelecting) return;
     lastPointer = getLocalPoint(e);
     updateSwipePath(true);
+
+    // detect which element is under the pointer
+    const el = document.elementFromPoint(e.clientX, e.clientY);
+    if(!el) return;
+
+    const letterEl = el.classList?.contains("letter") ? el : el.closest?.(".letter");
+    if(!letterEl) return;
+
+    const idx = parseInt(letterEl.dataset.index, 10);
+    if(Number.isFinite(idx)) {
+      markSelected(idx);
+      updateCurrentWord();
+    }
   }
 
-  function endSelect(){
+  function endSelect(e){
     if(!isSelecting) return;
     isSelecting = false;
     updateSwipePath(false);
+    try { $("wheel").releasePointerCapture?.(e.pointerId); } catch(_){}
   }
 
   function markSelected(idx){
